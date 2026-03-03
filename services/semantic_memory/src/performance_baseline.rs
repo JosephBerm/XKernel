@@ -437,5 +437,3 @@ use alloc::format;
         assert_eq!(suite.baselines().len(), 1);
     }
 }
-
-}}

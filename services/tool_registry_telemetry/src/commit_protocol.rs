@@ -222,7 +222,7 @@ mod tests {
 
     #[test]
     fn test_rollback_strategy_hash() {
-        use core::collections::hash_map::DefaultHasher;
+        use std::collections::hash_map::DefaultHasher;
         use core::hash::{Hash, Hasher};
 use alloc::string::ToString;
 

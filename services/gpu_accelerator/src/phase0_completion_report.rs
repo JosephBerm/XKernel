@@ -24,11 +24,9 @@
 //!
 //! Reference: Engineering Plan § Phase 0 Completion, Week 6 Finale
 
-use crate::gpu_performance_profiling::{
 use alloc::vec::Vec;
-
 use core::fmt;
-
+use crate::gpu_performance_profiling::{
     ExecutionOverheadProfile, ModelLoadPerformance, SubmissionLatencyProfile,
 };
 

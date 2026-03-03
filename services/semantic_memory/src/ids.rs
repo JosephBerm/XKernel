@@ -314,9 +314,7 @@ mod tests {
 
     #[test]
     fn test_memory_region_id_hash() {
-        use core::collections::hash_map::DefaultHasher;
-use alloc::string::String;
-use alloc::string::ToString;
+        use std::collections::hash_map::DefaultHasher;
 
         let id1 = MemoryRegionID::new("test");
         let id2 = MemoryRegionID::new("test");

@@ -30,7 +30,6 @@
 //! - Strongly typed identifiers prevent confusion
 //! - Validation on all binding creation and configuration
 
-#![no_std]
 #![forbid(unsafe_code)]
 
 extern crate alloc;
@@ -69,6 +68,10 @@ pub mod phase0_architecture_doc;
 pub mod phase0_integration_tests;
 pub mod phase1_transition_plan;
 pub mod retention_policy;
+pub mod registry;
+pub mod telemetry;
+pub mod journal;
+pub mod compliance_l1;
 
 // Re-export commonly used types
 pub use cache::CacheConfig;
@@ -131,9 +134,6 @@ pub use tool_registry_integration::TelemetryIntegratedToolRegistry;
 mod tests {
     use super::*;
     use crate::ids::AgentID;
-    use alloc::vec::Vec;
-use ulid::Ulid;
-use alloc::string::ToString;
 
     #[test]
     fn test_crate_compiles() {
@@ -144,8 +144,8 @@ use alloc::string::ToString;
 
     #[test]
     fn test_no_std_environment() {
-        // Verify we can use alloc without std
-        let mut vec = alloc::vec::Vec::new();
+        // Verify we can use Vec without std
+        let mut vec = Vec::new();
         vec.push(1);
         assert_eq!(vec.len(), 1);
     }

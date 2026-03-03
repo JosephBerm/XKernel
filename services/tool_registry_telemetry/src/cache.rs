@@ -340,7 +340,7 @@ mod tests {
 
     #[test]
     fn test_cache_key_strategy_hash() {
-        use core::collections::hash_map::DefaultHasher;
+        use std::collections::hash_map::DefaultHasher;
         use core::hash::{Hash, Hasher};
 use alloc::string::ToString;
 

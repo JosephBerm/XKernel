@@ -191,6 +191,7 @@ impl StubMemoryManager {
             } => self.handle_write(&region_id, offset, &data, &capability)?,
 
             MemoryRequest::Mount {
+                source,
                 mount_point,
                 capability,
             } => self.handle_mount(&mount_point, &capability)?,
@@ -202,9 +203,8 @@ impl StubMemoryManager {
 
             MemoryRequest::Evict {
                 region_id,
-                target_bytes,
                 capability,
-            } => self.handle_evict(&region_id, target_bytes, &capability)?,
+            } => self.handle_evict(&region_id, &capability)?,
         };
 
         Ok(response)
@@ -321,7 +321,6 @@ impl StubMemoryManager {
     fn handle_evict(
         &mut self,
         _region_id: &str,
-        _target_bytes: u64,
         _capability: &str,
     ) -> Result<MemoryResponse> {
         // Phase 0: Eviction not implemented

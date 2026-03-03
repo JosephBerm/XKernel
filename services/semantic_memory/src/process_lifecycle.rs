@@ -520,7 +520,7 @@ use alloc::string::ToString;
 
     #[test]
     fn test_memory_manager_serve_request_not_ready() {
-        let process = MemoryManagerProcess::new();
+        let mut process = MemoryManagerProcess::new();
         // Still in Initializing state
 
         let request = MemoryRequest::Allocate {

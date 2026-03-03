@@ -307,7 +307,7 @@ impl VramManager {
     /// Get the number of active allocations.
     pub fn allocation_count(&self) -> usize {
         if let Some(device_ordinal) = self.device_ordinal {
-            if device_ordinal as usize < self.device_partitions.len() {
+            if (device_ordinal as usize) < self.device_partitions.len() {
                 return self.device_partitions[device_ordinal as usize]
                     .2
                     .len();

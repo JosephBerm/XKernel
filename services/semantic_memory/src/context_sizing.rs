@@ -345,7 +345,7 @@ mod tests {
     #[test]
     fn test_l1_sizing_overhead_applied() {
         let model = ModelContextWindow::new(1024, 1, 1, 1024);
-        let calc = L1SizingCalculator::new(model, 8 * 1024 * 1024, 0.50); // 50% overhead
+        let calc = L1SizingCalculator::new(model.clone(), 8 * 1024 * 1024, 0.50); // 50% overhead
 
         let base = model.base_l1_size_bytes();
         let grad = model.gradient_cache_bytes();
@@ -359,7 +359,7 @@ mod tests {
     #[test]
     fn test_l1_sizing_zero_overhead() {
         let model = ModelContextWindow::new(1024, 1, 1, 1024);
-        let calc = L1SizingCalculator::new(model, 8 * 1024 * 1024, 0.0); // No overhead
+        let calc = L1SizingCalculator::new(model.clone(), 8 * 1024 * 1024, 0.0); // No overhead
 
         let base = model.base_l1_size_bytes();
         let grad = model.gradient_cache_bytes();

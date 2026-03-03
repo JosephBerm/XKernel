@@ -27,7 +27,7 @@ pub type Result<T> = core::result::Result<T, ToolError>;
 /// - Sandbox and security violations
 /// - Schema and type validation
 /// - Caching and transaction errors
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum ToolError {
     /// Tool binding not found in registry.
     ///

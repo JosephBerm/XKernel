@@ -28,7 +28,7 @@ use alloc::vec::Vec;
 use core::fmt;
 
 /// Framework type identifier.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum FrameworkType {
     /// NVIDIA vLLM (vllm.ai)
     VLlm,

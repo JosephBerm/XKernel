@@ -92,7 +92,7 @@ impl MemoryTier {
 }
 
 /// Memory operation types for access control and conflict detection.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum MemoryOperation {
     /// Read operation
     Read,

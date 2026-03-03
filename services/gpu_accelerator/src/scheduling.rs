@@ -126,8 +126,9 @@ pub struct RightSizer {
     /// Historical kernel metrics for sizing
     kernel_profiles: Vec<KernelProfile>,
     /// Min/max TPC bounds
-    min_tpc: u32,
-    max_tpc: u32,
+    pub min_tpc: u32,
+    /// Maximum TPC count
+    pub max_tpc: u32,
 }
 
 #[derive(Debug, Clone, Copy)]

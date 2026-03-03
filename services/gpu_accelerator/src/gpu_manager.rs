@@ -11,7 +11,7 @@
 //! Reference: Engineering Plan § GPU Manager Architecture, Week 4 Deliverables
 
 use crate::cuda_abstraction::{CudaApi, CudaContext};
-use crate::device::{GpuDevice, GpuDeviceType};
+use crate::device::{DriverApi, GpuDevice, GpuDeviceType};
 use crate::error::GpuError;
 use crate::ids::GpuDeviceID;
 use crate::model_registry::ModelRegistry;
@@ -217,14 +217,11 @@ impl GpuManager {
 
         // For now, create a mock device for testing
         // Real implementation will enumerate actual GPUs
-        let mock_device = GpuDevice {
-            id: GpuDeviceID::from_bytes([0u8; 16]),
-            device_type: GpuDeviceType::NvidiaH100,
-            ordinal: 0,
-            max_vram_bytes: GpuDeviceType::NvidiaH100.max_vram_bytes(),
-            tpc_count: GpuDeviceType::NvidiaH100.tpc_count(),
-            available_vram_bytes: GpuDeviceType::NvidiaH100.max_vram_bytes(),
-        };
+        let mock_device = GpuDevice::new(
+            GpuDeviceID::from_bytes([0u8; 16]),
+            GpuDeviceType::NvidiaH100,
+            DriverApi::CudaDriverApi,
+        );
 
         self.devices.push(mock_device);
         Ok(())
@@ -240,9 +237,8 @@ impl GpuManager {
         // (In a real implementation, this would call cuCtxCreate / hipCtxCreate)
 
         // For now, create a mock context for the primary device
-        let primary_device = &self.devices[0];
         let ctx = CudaContext {
-            device_ordinal: primary_device.ordinal,
+            device_ordinal: 0,
             context_handle: 0x1000, // Mock handle
             flags: 0,
         };

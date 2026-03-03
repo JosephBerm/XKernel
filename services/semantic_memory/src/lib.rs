@@ -24,7 +24,6 @@
 //! - Strongly typed memory identifiers prevent confusion
 //! - CRDT support for crew-wide shared memory consistency
 
-#![no_std]
 #![forbid(unsafe_code)]
 
 extern crate alloc;
@@ -39,6 +38,12 @@ pub mod l1_working;
 pub mod layout;
 pub mod memory;
 pub mod vector_index;
+
+// L1 scaffold modules (allocation, eviction, indexing, tiers)
+pub mod allocation;
+pub mod eviction;
+pub mod indexing;
+pub mod tiers;
 
 // Week 03 deliverables
 pub mod ipc_interface;

@@ -40,12 +40,14 @@
 //! }
 //! ```
 
-use crate::error::{Error, Result};
+use crate::error::{ToolError, Result};
 use serde_json::{json, Value};
-// use std::fs removed - not available in no_std
-use core::fmt::Write; // core Write instead of std::io
-use alloc::string::String; // PathBuf not available in no_std
-// use std::time removed - not available in no_std
+use std::fs;
+use std::fs::{File, OpenOptions};
+use std::io::{BufWriter, Write};
+use std::path::{Path, PathBuf};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use alloc::string::String;
 
 /// Maximum size for active log file before rotation (100MB)
 const MAX_LOG_SIZE: u64 = 104_857_600;
@@ -96,7 +98,7 @@ impl PersistentEventLogger {
         
         // Create log directory if it doesn't exist
         fs::create_dir_all(&log_dir)
-            .map_err(|e| Error::internal(format!("Failed to create log directory: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to create log directory: {}", e)))?;
 
         let active_log_path = log_dir.join("events.ndjson");
         let metadata_path = log_dir.join("events.metadata.json");
@@ -113,7 +115,7 @@ impl PersistentEventLogger {
             .create(true)
             .append(true)
             .open(&active_log_path)
-            .map_err(|e| Error::internal(format!("Failed to open log file: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to open log file: {}", e)))?;
 
         // Get actual file size if metadata was missing or incorrect
         let actual_size = file.metadata()
@@ -151,17 +153,17 @@ impl PersistentEventLogger {
     pub fn log_event(&mut self, event: &Value) -> Result<()> {
         if let Some(ref mut writer) = self.writer {
             let line = serde_json::to_string(event)
-                .map_err(|e| Error::internal(format!("Failed to serialize event: {}", e)))?;
+                .map_err(|e| ToolError::Other(format!("Failed to serialize event: {}", e)))?;
             
             writeln!(writer, "{}", line)
-                .map_err(|e| Error::internal(format!("Failed to write event: {}", e)))?;
+                .map_err(|e| ToolError::Other(format!("Failed to write event: {}", e)))?;
 
             // Update size tracking (rough estimate: line length + newline)
             self.current_size += (line.len() + 1) as u64;
 
             Ok(())
         } else {
-            Err(Error::internal("Logger writer is closed".to_string()))
+            Err(ToolError::Other("Logger writer is closed".to_string()))
         }
     }
 
@@ -247,7 +249,7 @@ impl PersistentEventLogger {
         // Generate timestamp for rotated file
         let rotation_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .map_err(|e| Error::internal(format!("System time error: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("System time error: {}", e)))?;
         
         let timestamp = rotation_time.as_secs();
         let ts_str = format_timestamp(timestamp);
@@ -261,7 +263,7 @@ impl PersistentEventLogger {
 
         // Remove the uncompressed log
         fs::remove_file(&self.active_log_path)
-            .map_err(|e| Error::internal(format!("Failed to remove log file: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to remove log file: {}", e)))?;
 
         // Save metadata with rotation info
         self.last_rotation_timestamp = now_timestamp();
@@ -273,7 +275,7 @@ impl PersistentEventLogger {
             .create(true)
             .append(true)
             .open(&self.active_log_path)
-            .map_err(|e| Error::internal(format!("Failed to reopen log file: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to reopen log file: {}", e)))?;
 
         self.writer = Some(BufWriter::new(file));
 
@@ -288,10 +290,10 @@ impl PersistentEventLogger {
         });
 
         let json_str = serde_json::to_string_pretty(&metadata)
-            .map_err(|e| Error::internal(format!("Failed to serialize metadata: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to serialize metadata: {}", e)))?;
 
         fs::write(&self.metadata_path, json_str)
-            .map_err(|e| Error::internal(format!("Failed to write metadata: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to write metadata: {}", e)))?;
 
         Ok(())
     }
@@ -326,9 +328,7 @@ fn now_timestamp() -> u64 {
 
 /// Formats a timestamp as YYYYMMDD_HHMMSS string.
 fn format_timestamp(secs: u64) -> String {
-    // use std::time removed - not available in no_std
-    
-    let time = UNIX_EPOCH + Duration::from_secs(secs);
+    let _time = UNIX_EPOCH + Duration::from_secs(secs);
     
     // Simple formatting - in production, use chrono
     let secs_today = secs % 86_400;
@@ -352,18 +352,18 @@ fn format_timestamp(secs: u64) -> String {
 /// Compresses a file using gzip.
 fn compress_file(input: &Path, output: &Path) -> Result<()> {
     let file_data = fs::read(input)
-        .map_err(|e| Error::internal(format!("Failed to read log file: {}", e)))?;
+        .map_err(|e| ToolError::Other(format!("Failed to read log file: {}", e)))?;
     
     let output_file = File::create(output)
-        .map_err(|e| Error::internal(format!("Failed to create archive: {}", e)))?;
+        .map_err(|e| ToolError::Other(format!("Failed to create archive: {}", e)))?;
     
     // For now, just write the data directly (compression requires flate2 crate)
     // In production, use: use flate2::Compression; use flate2::write::GzEncoder;
     let mut encoder = std::io::BufWriter::new(output_file);
     encoder.write_all(&file_data)
-        .map_err(|e| Error::internal(format!("Failed to write archive: {}", e)))?;
+        .map_err(|e| ToolError::Other(format!("Failed to write archive: {}", e)))?;
     encoder.flush()
-        .map_err(|e| Error::internal(format!("Failed to flush archive: {}", e)))?;
+        .map_err(|e| ToolError::Other(format!("Failed to flush archive: {}", e)))?;
 
     Ok(())
 }
@@ -379,7 +379,7 @@ use alloc::string::ToString;
     #[test]
     fn test_create_logger() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let logger = PersistentEventLogger::new(temp_dir.path())?;
@@ -390,7 +390,7 @@ use alloc::string::ToString;
     #[test]
     fn test_log_event() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let mut logger = PersistentEventLogger::new(temp_dir.path())?;
@@ -408,7 +408,7 @@ use alloc::string::ToString;
     #[test]
     fn test_check_rotation_not_triggered() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let mut logger = PersistentEventLogger::new(temp_dir.path())?;
@@ -423,7 +423,7 @@ use alloc::string::ToString;
     #[test]
     fn test_force_rotation() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let mut logger = PersistentEventLogger::new(temp_dir.path())?;
@@ -438,7 +438,7 @@ use alloc::string::ToString;
     #[test]
     fn test_multiple_events() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let mut logger = PersistentEventLogger::new(temp_dir.path())?;

@@ -9,10 +9,9 @@
 
 use alloc::string::String;
 use alloc::vec::Vec;
+use core::sync::atomic::{AtomicU64, Ordering};
 use crate::error::{MemoryError, Result};
 use crate::mem_syscall_interface::{
-use core::sync::atomic::{AtomicU64, Ordering};
-
     MemHandle, MountHandle, AllocFlags, MountFlags, MountSource,
 };
 use crate::mem_serialization::{

@@ -187,7 +187,7 @@ impl CefEncoder for JsonCefEncoder {
             crate::cef::CefEventType::ExceptionRaised => "ExceptionRaised",
         });
         json.push_str("\",\"timestamp_ms\":");
-        json.push_str(&alloc::format!("{}", event.timestamp_ms));
+        json.push_str(&alloc::format!("{}", event.timestamp_ns));
         json.push_str("}}");
 
         Ok(json.into_bytes())
@@ -264,7 +264,7 @@ impl CefEncoder for BinaryCefEncoder {
         bytes.push(event_type_byte);
 
         // Timestamp (8 bytes, big-endian)
-        bytes.extend_from_slice(&event.timestamp_ms.to_be_bytes());
+        bytes.extend_from_slice(&event.timestamp_ns.to_be_bytes());
 
         Ok(bytes)
     }
@@ -518,34 +518,34 @@ use alloc::vec;
     fn test_json_cef_encoder_creation() {
         let version = CefFormatVersion::new(1, 0, 0);
         let encoder = JsonCefEncoder::new(version, false);
-        assert_eq!(encoder.schema_version(), version);
+        assert_eq!(CefEncoder::schema_version(&encoder), version);
     }
 
     #[test]
     fn test_json_cef_encoder_compact() {
         let encoder = JsonCefEncoder::compact();
         assert!(!encoder.pretty_print);
-        assert_eq!(encoder.schema_version(), CefFormatVersion::default());
+        assert_eq!(CefEncoder::schema_version(&encoder), CefFormatVersion::default());
     }
 
     #[test]
     fn test_json_cef_encoder_pretty() {
         let encoder = JsonCefEncoder::pretty();
         assert!(encoder.pretty_print);
-        assert_eq!(encoder.schema_version(), CefFormatVersion::default());
+        assert_eq!(CefEncoder::schema_version(&encoder), CefFormatVersion::default());
     }
 
     #[test]
     fn test_binary_cef_encoder_creation() {
         let version = CefFormatVersion::new(1, 0, 0);
         let encoder = BinaryCefEncoder::new(version);
-        assert_eq!(encoder.schema_version(), version);
+        assert_eq!(CefEncoder::schema_version(&encoder), version);
     }
 
     #[test]
     fn test_binary_cef_encoder_default_version() {
         let encoder = BinaryCefEncoder::default_version();
-        assert_eq!(encoder.schema_version(), CefFormatVersion::default());
+        assert_eq!(CefEncoder::schema_version(&encoder), CefFormatVersion::default());
     }
 
     #[test]
@@ -588,7 +588,7 @@ use alloc::vec;
         let decoded = encoder.decode(&encoded).expect("decoding failed");
         assert_eq!(decoded.event_id, event.event_id);
         assert_eq!(decoded.event_type, event.event_type);
-        assert_eq!(decoded.timestamp_ms, event.timestamp_ms);
+        assert_eq!(decoded.timestamp_ns, event.timestamp_ns);
     }
 
     #[test]

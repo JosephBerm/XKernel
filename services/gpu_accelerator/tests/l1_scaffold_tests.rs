@@ -221,7 +221,7 @@ fn test_profiling_workflow() {
     // Simulate kernel execution and profiling
     for kernel_id in 0..5 {
         // Schedule
-        let _ = scheduler.schedule_kernel(kernel_id, 20 + kernel_id * 5);
+        let _ = scheduler.schedule_kernel(kernel_id, (20 + kernel_id * 5) as u32);
 
         // Profile execution
         let timing = GpuMs::new(50, 20, 10);

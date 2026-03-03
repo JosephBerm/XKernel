@@ -39,7 +39,7 @@ impl Display for ToolBindingID {
 ///
 /// See Engineering Plan § 2.11: Tool Definition & Registry.
 /// ToolIDs identify tool definitions (like a function or API endpoint schema).
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct ToolID(String);
 
 impl ToolID {
@@ -114,7 +114,7 @@ impl Display for PolicyID {
 ///
 /// See Engineering Plan § 2.12: CEF Event Structure.
 /// AgentIDs identify the principal (agent) that initiated or triggered an event.
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct AgentID(String);
 
 impl AgentID {
@@ -261,6 +261,31 @@ impl Display for CognitiveThreadID {
     }
 }
 
+/// A strongly-typed capability identifier.
+///
+/// See Engineering Plan § 3.1: Capability-Based Security.
+/// CapIDs identify capability tokens that authorize operations.
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub struct CapID([u8; 32]);
+
+impl CapID {
+    /// Creates a new capability ID from raw bytes.
+    pub fn from_bytes(bytes: [u8; 32]) -> Self {
+        CapID(bytes)
+    }
+
+    /// Returns the raw bytes of this capability ID.
+    pub fn as_bytes(&self) -> &[u8; 32] {
+        &self.0
+    }
+}
+
+impl Display for CapID {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Cap({:02x}{:02x}...)", self.0[0], self.0[1])
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -323,7 +348,7 @@ mod tests {
 
     #[test]
     fn test_id_hash() {
-        use core::collections::hash_map::DefaultHasher;
+        use std::collections::hash_map::DefaultHasher;
 
         let id1 = ToolID::new("same");
         let id2 = ToolID::new("same");
@@ -435,7 +460,7 @@ mod tests {
 
     #[test]
     fn test_span_id_hash() {
-        use core::collections::hash_map::DefaultHasher;
+        use std::collections::hash_map::DefaultHasher;
 use ulid::Ulid;
 use alloc::string::String;
 use alloc::string::ToString;

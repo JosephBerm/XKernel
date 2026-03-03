@@ -96,6 +96,14 @@ impl MountFlags {
     }
 }
 
+impl core::ops::BitOr for MountFlags {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self {
+        MountFlags(self.0 | rhs.0)
+    }
+}
+
 /// Opaque handle to an allocated memory region.
 ///
 /// This strongly-typed handle prevents confusion with other reference types.

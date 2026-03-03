@@ -36,8 +36,8 @@
 //! results.print_summary();
 //! ```
 
-use crate::error::{Error, Result};
-// use std::time removed - not available in no_std
+use crate::error::{ToolError, Result};
+use std::time::Instant;
 
 /// Performance metrics for a single benchmark result.
 #[derive(Debug, Clone)]
@@ -341,7 +341,7 @@ impl PerformanceBenchmark {
 
             let start = Instant::now();
             let _ = serde_json::to_string(&event)
-                .map_err(|e| Error::internal(format!("Serialization failed: {}", e)))?;
+                .map_err(|e| ToolError::Other(format!("Serialization failed: {}", e)))?;
             let elapsed = start.elapsed().as_micros() as u64;
             latencies.push(elapsed);
 

@@ -91,20 +91,20 @@ fn test_vector_index_operations() {
 
     // Insert vectors
     assert!(index
-        .insert(1, alloc::vec![1.0, 0.0, 0.0])
+        .insert(1, vec![1.0, 0.0, 0.0])
         .is_ok());
     assert!(index
-        .insert(2, alloc::vec![0.0, 1.0, 0.0])
+        .insert(2, vec![0.0, 1.0, 0.0])
         .is_ok());
     assert!(index
-        .insert(3, alloc::vec![0.99, 0.01, 0.0])
+        .insert(3, vec![0.99, 0.01, 0.0])
         .is_ok());
 
     assert_eq!(index.len(), 3);
 
     // Wrong dimension should fail
     assert!(matches!(
-        index.insert(4, alloc::vec![1.0, 0.0]),
+        index.insert(4, vec![1.0, 0.0]),
         Err(IndexError::DimensionMismatch { .. })
     ));
 
@@ -124,17 +124,17 @@ fn test_vector_index_operations() {
 fn test_semantic_prefetch_strategies() {
     // Semantic prefetch enabled
     let mut semantic = SemanticPrefetch::new(PrefetchStrategy::Semantic, 5);
-    semantic.add_prefetch_candidates(alloc::vec![1, 2, 3]);
+    semantic.add_prefetch_candidates(vec![1, 2, 3]);
     assert_eq!(semantic.pending_count(), 3);
 
     // None strategy disabled
     let mut none = SemanticPrefetch::new(PrefetchStrategy::None, 5);
-    none.add_prefetch_candidates(alloc::vec![1, 2, 3]);
+    none.add_prefetch_candidates(vec![1, 2, 3]);
     assert_eq!(none.pending_count(), 0);
 
     // Hybrid strategy
     let mut hybrid = SemanticPrefetch::new(PrefetchStrategy::Hybrid, 5);
-    hybrid.add_prefetch_candidates(alloc::vec![1, 2, 3]);
+    hybrid.add_prefetch_candidates(vec![1, 2, 3]);
     assert_eq!(hybrid.pending_count(), 3);
 
     // Get prefetches in order
@@ -154,6 +154,7 @@ fn test_arena_allocator_stress() {
         match arena.allocate(100 * (i + 1)) {
             Ok(offset) => offsets.push(offset),
             Err(AllocationError::OutOfMemory { .. }) => break,
+            Err(_) => break,
         }
     }
 
@@ -209,7 +210,7 @@ fn test_tier_workflow() {
 
     // Add to L1 with vector index
     l1_index
-        .insert(1, alloc::vec![0.1; 768])
+        .insert(1, vec![0.1; 768])
         .unwrap();
     assert_eq!(l1_index.len(), 1);
 
@@ -263,7 +264,7 @@ fn test_error_handling() {
 
     let mut index = VectorIndex::new(2, 10);
     assert!(matches!(
-        index.insert(1, alloc::vec![1.0]),
+        index.insert(1, vec![1.0]),
         Err(IndexError::DimensionMismatch { .. })
     ));
 }

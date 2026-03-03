@@ -62,6 +62,7 @@ bitflags! {
     /// Capabilities are checked before allowing operations to proceed.
     ///
     /// See Engineering Plan § 3.1 (Capability-Based Security).
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     pub struct MemoryCapabilityFlags: u32 {
         /// Capability to allocate memory
         const ALLOCATE = 0x0001;

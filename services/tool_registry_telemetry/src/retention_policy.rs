@@ -39,12 +39,14 @@
 //! println!("Purged {} events", stats.events_purged);
 //! ```
 
-use crate::error::{Error, Result};
+use crate::error::{ToolError, Result};
 use serde_json::{json, Value};
-// use std::fs removed - not available in no_std
-use core::fmt::Write; // core Write instead of std::io
-use alloc::string::String; // PathBuf not available in no_std
-// use std::time removed - not available in no_std
+use std::fs;
+use std::fs::{File, OpenOptions};
+use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::path::{Path, PathBuf};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use alloc::string::String;
 
 /// Default retention window: 7 days
 const DEFAULT_RETENTION_SECS: u64 = 604_800;
@@ -134,7 +136,7 @@ impl RetentionPolicy {
         // Ensure files exist
         if !audit_log_path.exists() {
             File::create(&audit_log_path)
-                .map_err(|e| Error::internal(format!("Failed to create audit log: {}", e)))?;
+                .map_err(|e| ToolError::Other(format!("Failed to create audit log: {}", e)))?;
         }
 
         let last_cleanup_timestamp = Self::load_metadata(&metadata_path)
@@ -177,7 +179,7 @@ impl RetentionPolicy {
 
         // Read and process events
         let file = File::open(&self.event_log_path)
-            .map_err(|e| Error::internal(format!("Failed to open event log: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to open event log: {}", e)))?;
         
         let reader = BufReader::new(file);
         let mut retained_lines = Vec::new();
@@ -224,21 +226,21 @@ impl RetentionPolicy {
                 .create(true)
                 .append(true)
                 .open(&self.audit_log_path)
-                .map_err(|e| Error::internal(format!("Failed to open audit log: {}", e)))?;
+                .map_err(|e| ToolError::Other(format!("Failed to open audit log: {}", e)))?;
 
             for line in audit_lines {
                 writeln!(audit_file, "{}", line)
-                    .map_err(|e| Error::internal(format!("Failed to write audit: {}", e)))?;
+                    .map_err(|e| ToolError::Other(format!("Failed to write audit: {}", e)))?;
             }
         }
 
         // Rewrite event log with retained entries
         let mut new_file = File::create(&self.event_log_path)
-            .map_err(|e| Error::internal(format!("Failed to create event log: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to create event log: {}", e)))?;
 
         for line in retained_lines {
             writeln!(new_file, "{}", line)
-                .map_err(|e| Error::internal(format!("Failed to write event: {}", e)))?;
+                .map_err(|e| ToolError::Other(format!("Failed to write event: {}", e)))?;
         }
 
         self.last_cleanup_timestamp = stats.cleanup_timestamp;
@@ -285,7 +287,7 @@ impl RetentionPolicy {
         }
 
         let file = File::open(&self.audit_log_path)
-            .map_err(|e| Error::internal(format!("Failed to open audit log: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to open audit log: {}", e)))?;
         
         let reader = BufReader::new(file);
 
@@ -316,10 +318,10 @@ impl RetentionPolicy {
         });
 
         let json_str = serde_json::to_string_pretty(&metadata)
-            .map_err(|e| Error::internal(format!("Failed to serialize metadata: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to serialize metadata: {}", e)))?;
 
         fs::write(&self.metadata_path, json_str)
-            .map_err(|e| Error::internal(format!("Failed to write metadata: {}", e)))?;
+            .map_err(|e| ToolError::Other(format!("Failed to write metadata: {}", e)))?;
 
         Ok(())
     }
@@ -349,7 +351,7 @@ use alloc::vec::Vec;
     #[test]
     fn test_create_retention_policy() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let policy = RetentionPolicy::new(temp_dir.path())?;
@@ -360,7 +362,7 @@ use alloc::vec::Vec;
     #[test]
     fn test_custom_retention_window() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let custom_window = 3600; // 1 hour
@@ -372,7 +374,7 @@ use alloc::vec::Vec;
     #[test]
     fn test_cleanup_no_events() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let mut policy = RetentionPolicy::new(temp_dir.path())?;
@@ -386,7 +388,7 @@ use alloc::vec::Vec;
     #[test]
     fn test_audit_log_creation() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let policy = RetentionPolicy::new(temp_dir.path())?;
@@ -397,7 +399,7 @@ use alloc::vec::Vec;
     #[test]
     fn test_read_audit_log_empty() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let policy = RetentionPolicy::new(temp_dir.path())?;
@@ -418,7 +420,7 @@ use alloc::vec::Vec;
     #[test]
     fn test_metadata_persistence() -> Result<()> {
         let temp_dir = TempDir::new().map_err(|e| {
-            Error::internal(format!("Temp dir failed: {}", e))
+            ToolError::Other(format!("Temp dir failed: {}", e))
         })?;
         
         let mut policy = RetentionPolicy::new(temp_dir.path())?;

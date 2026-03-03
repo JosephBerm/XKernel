@@ -310,9 +310,9 @@ impl Phase1TransitionAssessment {
             "Replace stub with real memory allocator backed by page pool",
             15,
         );
-        real_allocator.add_criterion("mem_alloc latency < 50µs p99".into());
-        real_allocator.add_criterion("10K+ allocations/sec throughput".into());
-        real_allocator.add_criterion("Page pool integration complete".into());
+        real_allocator.add_criterion("mem_alloc latency < 50µs p99");
+        real_allocator.add_criterion("10K+ allocations/sec throughput");
+        real_allocator.add_criterion("Page pool integration complete");
         self.enhancements.push(real_allocator);
 
         let mut eviction = Phase1Enhancement::new(
@@ -320,10 +320,10 @@ impl Phase1TransitionAssessment {
             "Implement memory eviction when tier reaches capacity",
             12,
         );
-        eviction.add_dependency("Real L1 Allocator Implementation".into());
-        eviction.add_criterion("LRU eviction working for L1→L2".into());
-        eviction.add_criterion("No panics on memory pressure".into());
-        eviction.add_criterion("Eviction latency < 100µs p99".into());
+        eviction.add_dependency("Real L1 Allocator Implementation");
+        eviction.add_criterion("LRU eviction working for L1→L2");
+        eviction.add_criterion("No panics on memory pressure");
+        eviction.add_criterion("Eviction latency < 100µs p99");
         self.enhancements.push(eviction);
 
         let mut l2_l3 = Phase1Enhancement::new(
@@ -331,10 +331,10 @@ impl Phase1TransitionAssessment {
             "Integrate L2 episodic and L3 long-term tiers with real backing",
             20,
         );
-        l2_l3.add_dependency("Real L1 Allocator Implementation".into());
-        l2_l3.add_criterion("L2 reads from DRAM within 1ms".into());
-        l2_l3.add_criterion("L3 reads from NVME with prefetch".into());
-        l2_l3.add_criterion("Tier migration working end-to-end".into());
+        l2_l3.add_dependency("Real L1 Allocator Implementation");
+        l2_l3.add_criterion("L2 reads from DRAM within 1ms");
+        l2_l3.add_criterion("L3 reads from NVME with prefetch");
+        l2_l3.add_criterion("Tier migration working end-to-end");
         self.enhancements.push(l2_l3);
 
         let mut crdt = Phase1Enhancement::new(
@@ -342,10 +342,10 @@ impl Phase1TransitionAssessment {
             "Implement CRDT-based replication for allocations across crew members",
             10,
         );
-        crdt.add_dependency("Real L1 Allocator Implementation".into());
-        crdt.add_criterion("AllocFlags::REPLICATE causes crew sync".into());
-        crdt.add_criterion("Conflict resolution via CRDT".into());
-        crdt.add_criterion("No divergence across crew after 1000 ops".into());
+        crdt.add_dependency("Real L1 Allocator Implementation");
+        crdt.add_criterion("AllocFlags::REPLICATE causes crew sync");
+        crdt.add_criterion("Conflict resolution via CRDT");
+        crdt.add_criterion("No divergence across crew after 1000 ops");
         self.enhancements.push(crdt);
 
         let mut prefetch = Phase1Enhancement::new(
@@ -353,9 +353,9 @@ impl Phase1TransitionAssessment {
             "Add semantic prefetching based on context window and access patterns",
             8,
         );
-        prefetch.add_dependency("L2/L3 Tier Integration".into());
-        prefetch.add_criterion("Prefetch reduces L3 read latency by 10%+".into());
-        prefetch.add_criterion("No over-fetching (wasted bandwidth < 20%)".into());
+        prefetch.add_dependency("L2/L3 Tier Integration");
+        prefetch.add_criterion("Prefetch reduces L3 read latency by 10%+");
+        prefetch.add_criterion("No over-fetching (wasted bandwidth < 20%)");
         self.enhancements.push(prefetch);
 
         // Risk assessments
@@ -524,8 +524,8 @@ use alloc::format;
     #[test]
     fn test_phase1_enhancement() {
         let mut enhancement = Phase1Enhancement::new("Test Feature", "Test description", 5);
-        enhancement.add_dependency("Dep1".into());
-        enhancement.add_criterion("Criterion 1".into());
+        enhancement.add_dependency("Dep1");
+        enhancement.add_criterion("Criterion 1");
 
         assert_eq!(enhancement.estimated_days, 5);
         assert_eq!(enhancement.dependencies.len(), 1);

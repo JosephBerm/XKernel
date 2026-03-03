@@ -61,7 +61,7 @@ pub fn test_model_load_pipeline() -> Result<(), ()> {
         return Err(());
     }
 
-    if load_request.model_size_bytes != model_size {
+    if load_request.estimated_vram_bytes != model_size {
         return Err(());
     }
 
@@ -406,7 +406,7 @@ pub fn test_stress_multiple_concurrent_submissions() -> Result<(), ()> {
 
     // Verify stats tracking
     let stats_before = async_mgr.stats();
-    if stats_before.total_events != 0 {
+    if stats_before.total_events_recorded != 0 {
         return Err(());
     }
 

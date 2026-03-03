@@ -27,7 +27,7 @@ pub type Result<T> = core::result::Result<T, MemoryError>;
 /// - Eviction and tier migration failures
 /// - Capability and isolation violations
 /// - Data consistency and replication errors
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum MemoryError {
     /// Allocation failed due to insufficient capacity in target tier.
     ///

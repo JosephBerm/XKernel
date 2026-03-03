@@ -325,11 +325,9 @@ impl TelemetryIntegratedToolRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ids::ToolID;
+    use crate::ids::{ToolID, CapID};
     use crate::effect_class::EffectClass;
-    use crate::schema::TypeSchema;
-use alloc::format;
-use alloc::string::ToString;
+    use crate::schema::{TypeSchema, SchemaDefinition};
 
     #[test]
     fn test_telemetry_integrated_registry_creation() {
@@ -345,8 +343,8 @@ use alloc::string::ToString;
             ToolBindingID::new("web-search"),
             ToolID::new("web-search-api"),
             AgentID::new("agent-1"),
-            [42u8; 32],
-            TypeSchema::new("WebSearchInput", alloc::vec::Vec::new()),
+            CapID::from_bytes([42u8; 32]),
+            TypeSchema::new(SchemaDefinition::new("WebSearchInput"), SchemaDefinition::new("WebSearchOutput")),
         );
 
         let result = registry.register_tool(binding, AgentID::new("agent-1"));

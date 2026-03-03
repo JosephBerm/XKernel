@@ -250,24 +250,25 @@ impl L1Allocator {
     ///
     /// `Result<u64>` - New physical address
     pub fn resize(&mut self, allocation_id: u64, new_size_bytes: u64) -> Result<u64> {
-        let allocation = self.allocations.get(&allocation_id).ok_or_else(|| {
-            MemoryError::InvalidReference {
-                reason: format!("allocation {} not found", allocation_id),
-            }
-        })?;
+        let (old_page_count, first_page_idx, owner_ct_id) = {
+            let allocation = self.allocations.get(&allocation_id).ok_or_else(|| {
+                MemoryError::InvalidReference {
+                    reason: format!("allocation {} not found", allocation_id),
+                }
+            })?;
+            (allocation.page_count(), allocation.first_page_idx(), allocation.owner_ct_id())
+        };
 
-        let old_page_count = allocation.page_count();
         let new_page_count = (new_size_bytes + PAGE_SIZE - 1) / PAGE_SIZE;
 
         if new_page_count == old_page_count {
             // No change needed
-            return Ok(self.page_pool.page_to_address(allocation.first_page_idx()));
+            return Ok(self.page_pool.page_to_address(first_page_idx));
         }
 
         if new_page_count > old_page_count {
             // Growing allocation - allocate additional pages
             let additional_pages = new_page_count - old_page_count;
-            let first_page_idx = allocation.first_page_idx();
 
             // Check if we can extend in place (next pages are free)
             let mut can_extend = true;
@@ -288,14 +289,14 @@ impl L1Allocator {
                 // Extend in place
                 let (_, _) = self
                     .page_pool
-                    .allocate_pages(additional_pages, allocation.owner_ct_id())?;
+                    .allocate_pages(additional_pages, owner_ct_id)?;
                 let allocation = self.allocations.get_mut(&allocation_id).unwrap();
                 allocation.page_count = new_page_count;
             } else {
                 // Must relocate
                 self.deallocate(allocation_id)?;
                 let (new_alloc_id, new_addr, _) = self
-                    .allocate(new_size_bytes, allocation.owner_ct_id())?;
+                    .allocate(new_size_bytes, owner_ct_id)?;
 
                 // For caller: they should use the new allocation_id
                 // For now, we'll update the map
@@ -308,7 +309,6 @@ impl L1Allocator {
         } else {
             // Shrinking allocation - deallocate trailing pages
             let pages_to_free = old_page_count - new_page_count;
-            let first_page_idx = allocation.first_page_idx();
             self.page_pool
                 .deallocate_pages(first_page_idx + new_page_count, pages_to_free)?;
 
@@ -316,9 +316,7 @@ impl L1Allocator {
             allocation.page_count = new_page_count;
         }
 
-        Ok(self.page_pool.page_to_address(
-            allocation.first_page_idx(),
-        ))
+        Ok(self.page_pool.page_to_address(first_page_idx))
     }
 
     /// Pins an allocation (prevents deallocation).

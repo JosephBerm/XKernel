@@ -228,7 +228,7 @@ impl MetricsCollector {
                 }
 
                 // Update latency percentiles (stub: use direct values)
-                if metrics.p50_us == 0 {
+                if metrics.latency.p50_us == 0 {
                     metrics.latency.p50_us = latency_us;
                     metrics.latency.p95_us = latency_us;
                     metrics.latency.p99_us = latency_us;

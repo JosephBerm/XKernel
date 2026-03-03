@@ -395,7 +395,7 @@ mod tests {
 
     #[test]
     fn test_gpu_utilization_report_creation() {
-        let device_id = [1u8; 16];
+        let device_id = GpuDeviceID::from_bytes([1u8; 16]);
         let report = GpuUtilizationReport::new(
             device_id,
             85,
@@ -419,11 +419,11 @@ mod tests {
     fn test_feedback_generator() {
         let mut gen_val = FeedbackGenerator::new(100_000_000); // 100ms interval
 
-        assert!(gen.should_report(200_000_000));
-        assert!(!gen.should_report(150_000_000));
+        assert!(gen_val.should_report(200_000_000));
+        assert!(!gen_val.should_report(150_000_000));
 
-        let seq1 = gen.next_report_sequence();
-        let seq2 = gen.next_report_sequence();
+        let seq1 = gen_val.next_report_sequence();
+        let seq2 = gen_val.next_report_sequence();
         assert_eq!(seq2, seq1 + 1);
     }
 }

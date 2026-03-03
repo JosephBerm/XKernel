@@ -10,7 +10,7 @@ use cs_tool_registry_telemetry::telemetry::{CefEvent, CostAttribution, Streaming
 
 #[test]
 fn test_tool_binding_creation() {
-    let binding = ToolBinding::new(1, alloc::string::String::from("test_tool"), SandboxLevel::Process)
+    let binding = ToolBinding::new(1, String::from("test_tool"), SandboxLevel::Process)
         .with_mcp(true)
         .with_hash(12345);
 
@@ -23,8 +23,8 @@ fn test_tool_binding_creation() {
 fn test_mcp_registry_operations() {
     let mut registry = McpRegistry::new(10);
 
-    let b1 = ToolBinding::new(1, alloc::string::String::from("tool1"), SandboxLevel::Process);
-    let b2 = ToolBinding::new(2, alloc::string::String::from("tool2"), SandboxLevel::Container);
+    let b1 = ToolBinding::new(1, String::from("tool1"), SandboxLevel::Process);
+    let b2 = ToolBinding::new(2, String::from("tool2"), SandboxLevel::Container);
 
     assert!(registry.register(b1).is_ok());
     assert!(registry.register(b2).is_ok());
@@ -38,9 +38,9 @@ fn test_mcp_registry_operations() {
 fn test_registry_sandbox_filtering() {
     let mut registry = McpRegistry::new(10);
 
-    registry.register(ToolBinding::new(1, alloc::string::String::from("t1"), SandboxLevel::Process)).unwrap();
-    registry.register(ToolBinding::new(2, alloc::string::String::from("t2"), SandboxLevel::Process)).unwrap();
-    registry.register(ToolBinding::new(3, alloc::string::String::from("t3"), SandboxLevel::Container)).unwrap();
+    registry.register(ToolBinding::new(1, String::from("t1"), SandboxLevel::Process)).unwrap();
+    registry.register(ToolBinding::new(2, String::from("t2"), SandboxLevel::Process)).unwrap();
+    registry.register(ToolBinding::new(3, String::from("t3"), SandboxLevel::Container)).unwrap();
 
     assert_eq!(registry.count_by_sandbox(SandboxLevel::Process), 2);
     assert_eq!(registry.count_by_sandbox(SandboxLevel::Container), 1);
@@ -61,12 +61,12 @@ fn test_sandbox_policy_enforcement() {
 
 #[test]
 fn test_cef_event_creation() {
-    let event = CefEvent::new(alloc::string::String::from("device1"), 1, 5);
+    let event = CefEvent::new(String::from("device1"), 1, 5);
     assert_eq!(event.event_id, 1);
     assert_eq!(event.severity, 5);
 
     let mut ext = event.extension.clone();
-    ext.source_ip = alloc::string::String::from("192.168.1.1");
+    ext.source_ip = String::from("192.168.1.1");
     assert_eq!(ext.source_ip, "192.168.1.1");
 }
 
@@ -90,7 +90,7 @@ fn test_streaming_processor() {
     let mut processor = StreamingProcessor::new(10, 1000);
 
     for i in 0..5 {
-        let event = CefEvent::new(alloc::string::String::from("device1"), i, 5);
+        let event = CefEvent::new(String::from("device1"), i, 5);
         processor.add_event(event).unwrap();
     }
 
@@ -143,11 +143,11 @@ fn test_retention_policy() {
 
 #[test]
 fn test_journal_entry_creation() {
-    let entry = JournalEntry::new(1, alloc::string::String::from("context"), RedactionLevel::Public)
-        .with_observation(alloc::string::String::from("observed X"))
-        .with_decision(alloc::string::String::from("decide Y"))
-        .with_action(alloc::string::String::from("do Z"))
-        .with_outcome(alloc::string::String::from("result W"));
+    let entry = JournalEntry::new(1, String::from("context"), RedactionLevel::Public)
+        .with_observation(String::from("observed X"))
+        .with_decision(String::from("decide Y"))
+        .with_action(String::from("do Z"))
+        .with_outcome(String::from("result W"));
 
     assert_eq!(entry.entry_id, 1);
     assert_eq!(entry.observation, "observed X");
@@ -155,9 +155,9 @@ fn test_journal_entry_creation() {
 
 #[test]
 fn test_redaction_levels() {
-    let public = JournalEntry::new(1, alloc::string::String::from("public"), RedactionLevel::Public);
+    let public = JournalEntry::new(1, String::from("public"), RedactionLevel::Public);
     let confidential =
-        JournalEntry::new(2, alloc::string::String::from("secret"), RedactionLevel::HighlyConfidential);
+        JournalEntry::new(2, String::from("secret"), RedactionLevel::HighlyConfidential);
 
     let pub_redacted = public.redacted();
     assert_eq!(pub_redacted.context, "public"); // Unchanged
@@ -170,8 +170,8 @@ fn test_redaction_levels() {
 fn test_cognitive_journal_workflow() {
     let mut journal = CognitiveJournal::new(100);
 
-    let entry1 = JournalEntry::new(0, alloc::string::String::from("ctx1"), RedactionLevel::Public);
-    let entry2 = JournalEntry::new(0, alloc::string::String::from("ctx2"), RedactionLevel::Internal);
+    let entry1 = JournalEntry::new(0, String::from("ctx1"), RedactionLevel::Public);
+    let entry2 = JournalEntry::new(0, String::from("ctx2"), RedactionLevel::Internal);
 
     let id1 = journal.record(entry1).unwrap();
     let id2 = journal.record(entry2).unwrap();
@@ -189,10 +189,10 @@ fn test_integrated_registry_and_journal() {
     let mut journal = CognitiveJournal::new(100);
 
     // Register tools
-    registry.register(ToolBinding::new(1, alloc::string::String::from("t1"), SandboxLevel::Process)).unwrap();
+    registry.register(ToolBinding::new(1, String::from("t1"), SandboxLevel::Process)).unwrap();
 
     // Record journal entry for tool execution
-    let entry = JournalEntry::new(0, alloc::string::String::from("tool 1 execution"), RedactionLevel::Internal);
+    let entry = JournalEntry::new(0, String::from("tool 1 execution"), RedactionLevel::Internal);
     let _ = journal.record(entry).unwrap();
 
     assert_eq!(registry.total_tools(), 1);
@@ -209,7 +209,7 @@ fn test_compliance_with_telemetry() {
     engine.log_entry(entry).unwrap();
 
     // Add telemetry event
-    let event = CefEvent::new(alloc::string::String::from("device1"), 1, 5);
+    let event = CefEvent::new(String::from("device1"), 1, 5);
     processor.add_event(event).unwrap();
 
     assert_eq!(engine.audit_count(), 1);
@@ -220,7 +220,7 @@ fn test_compliance_with_telemetry() {
 fn test_full_workflow() {
     // Registry setup
     let mut registry = McpRegistry::new(10);
-    registry.register(ToolBinding::new(1, alloc::string::String::from("compute_tool"), SandboxLevel::Container)).unwrap();
+    registry.register(ToolBinding::new(1, String::from("compute_tool"), SandboxLevel::Container)).unwrap();
 
     // Policy setup
     let policy = SandboxPolicy::new(SandboxLevel::Process);
@@ -233,12 +233,12 @@ fn test_full_workflow() {
 
     // Journal setup
     let mut journal = CognitiveJournal::new(100);
-    let entry = JournalEntry::new(0, alloc::string::String::from("workflow"), RedactionLevel::Internal);
+    let entry = JournalEntry::new(0, String::from("workflow"), RedactionLevel::Internal);
     journal.record(entry).unwrap();
 
     // Telemetry
     let mut processor = StreamingProcessor::default();
-    let event = CefEvent::new(alloc::string::String::from("system"), 1, 3);
+    let event = CefEvent::new(String::from("system"), 1, 3);
     processor.add_event(event).unwrap();
 
     // Verify all components
@@ -253,13 +253,13 @@ fn test_full_workflow() {
 fn test_error_handling() {
     // Registry full
     let mut registry = McpRegistry::new(1);
-    registry.register(ToolBinding::new(1, alloc::string::String::from("t1"), SandboxLevel::Process)).unwrap();
-    assert!(registry.register(ToolBinding::new(2, alloc::string::String::from("t2"), SandboxLevel::Process)).is_err());
+    registry.register(ToolBinding::new(1, String::from("t1"), SandboxLevel::Process)).unwrap();
+    assert!(registry.register(ToolBinding::new(2, String::from("t2"), SandboxLevel::Process)).is_err());
 
     // Journal full
     let mut journal = CognitiveJournal::new(1);
-    journal.record(JournalEntry::new(0, alloc::string::String::from("e1"), RedactionLevel::Public)).unwrap();
-    assert!(journal.record(JournalEntry::new(0, alloc::string::String::from("e2"), RedactionLevel::Public)).is_err());
+    journal.record(JournalEntry::new(0, String::from("e1"), RedactionLevel::Public)).unwrap();
+    assert!(journal.record(JournalEntry::new(0, String::from("e2"), RedactionLevel::Public)).is_err());
 }
 
 #[test]

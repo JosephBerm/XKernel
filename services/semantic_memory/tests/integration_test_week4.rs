@@ -13,10 +13,6 @@
 #[cfg(test)]
 mod integration_tests {
     use cs_semantic_memory::{
-use alloc::format;
-use alloc::vec;
-use alloc::vec::Vec;
-use alloc::string::ToString;
         StubMemoryManager, MemoryManagerConfig, PagePool, L1Allocator,
         MemoryManagerState, MemoryRequest, MemoryTierSpec,
         L1SizingCalculator, ModelContextWindow, HeapAllocator,
@@ -246,7 +242,7 @@ use alloc::string::ToString;
 
         let response = mm.handle_request(query).unwrap();
         if let cs_semantic_memory::MemoryResponse::QueryResult { stats } = response {
-            assert!(stats.used_bytes >= total_allocated);
+            assert!(stats.allocated_bytes >= total_allocated);
         }
     }
 

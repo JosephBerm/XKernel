@@ -406,7 +406,7 @@ mod tests {
 
     #[test]
     fn test_device_recovery_manager_creation() {
-        let device_id = [1u8; 16];
+        let device_id = GpuDeviceID::from_bytes([1u8; 16]);
         let manager = DeviceRecoveryManager::new(device_id, 5);
 
         assert_eq!(manager.state, DeviceRecoveryState::Healthy);
@@ -415,7 +415,7 @@ mod tests {
 
     #[test]
     fn test_memory_allocation_tracking() {
-        let device_id = [1u8; 16];
+        let device_id = GpuDeviceID::from_bytes([1u8; 16]);
         let mut manager = DeviceRecoveryManager::new(device_id, 5);
 
         let crew_id = [1u8; 16];
@@ -427,7 +427,7 @@ mod tests {
 
     #[test]
     fn test_memory_leak_detection() {
-        let device_id = [1u8; 16];
+        let device_id = GpuDeviceID::from_bytes([1u8; 16]);
         let mut manager = DeviceRecoveryManager::new(device_id, 5);
 
         let crew_id = [1u8; 16];
@@ -441,7 +441,7 @@ mod tests {
 
     #[test]
     fn test_backoff_calculation() {
-        let device_id = [1u8; 16];
+        let device_id = GpuDeviceID::from_bytes([1u8; 16]);
         let mut manager = DeviceRecoveryManager::new(device_id, 5);
 
         manager.consecutive_error_count = 1;
@@ -456,7 +456,7 @@ mod tests {
     #[test]
     fn test_error_recovery_coordinator() {
         let mut coordinator = ErrorRecoveryCoordinator::new();
-        let device_id = [1u8; 16];
+        let device_id = GpuDeviceID::from_bytes([1u8; 16]);
 
         coordinator.register_device(device_id, 5);
         assert_eq!(coordinator.healthy_device_count(), 1);

@@ -102,7 +102,6 @@
 //! - [`gpu_error_recovery`]: Robust error recovery, memory leak detection, fault isolation
 //! - [`phase0_completion_report`]: Phase 0 architecture validation and Phase 1 readiness
 
-#![no_std]
 #![forbid(unsafe_code)]
 #![warn(missing_docs, missing_debug_implementations)]
 
@@ -153,6 +152,11 @@ pub mod gpu_integration_tests;
 pub mod gpu_performance_profiling;
 pub mod phase0_completion_report;
 pub mod scheduler_feedback;
+
+// L1 scaffold modules (scheduling, profiling, vram management)
+pub mod profiling;
+pub mod scheduling;
+pub mod vram_management;
 
 // Re-exports for convenience
 pub use async_execution::{AsyncExecutionManager, AsyncExecutionStats, EventCompletion, EventStatus, GpuEventHandle};
@@ -310,7 +314,7 @@ mod tests {
 
     #[test]
     fn test_scheduler_feedback_generator() {
-        let gen_val = FeedbackGenerator::new(100_000_000);
+        let gen = FeedbackGenerator::new(100_000_000);
         assert!(gen.should_report(200_000_000));
     }
 
