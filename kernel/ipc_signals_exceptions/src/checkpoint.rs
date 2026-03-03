@@ -2,6 +2,7 @@
 // Copyright 2026 XKernal Contributors
 //! Checkpoint, snapshot, and CRDT-based state synchronization
 
+use alloc::vec;
 use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

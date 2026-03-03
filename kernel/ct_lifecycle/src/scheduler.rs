@@ -3,7 +3,7 @@
 //! Priority queue-based scheduler for fair task scheduling
 
 use alloc::collections::BinaryHeap;
-use crate::types::{CognitiveTask, Priority};
+use crate::types::Priority;
 use core::cmp::Ordering;
 use thiserror::Error;
 
@@ -142,11 +142,13 @@ impl PriorityScheduler {
 
     /// Yield execution for the current task (move to back of queue)
     pub fn yield_now(&mut self) -> Result<Option<u64>> {
-        if let Some((task_id, priority)) = self.dequeue() {
-            self.enqueue(task_id, priority)?;
-            Ok(Some(task_id))
-        } else {
-            Ok(None)
+        match self.dequeue() {
+            Ok((task_id, priority)) => {
+                self.enqueue(task_id, priority)?;
+                Ok(Some(task_id))
+            }
+            Err(SchedulingError::EmptyQueue) => Ok(None),
+            Err(e) => Err(e),
         }
     }
 

@@ -23,9 +23,15 @@ pub mod lifecycle;
 pub mod scheduler;
 pub mod memory;
 pub mod types;
+pub mod error;
+pub mod ids;
+pub mod dependency_dag;
 
 // Re-export commonly used types
 pub use lifecycle::{TaskStateMachine, TaskTransition, TaskState};
 pub use scheduler::{PriorityScheduler, SchedulingError};
 pub use memory::{ArenaAllocator, MemoryPool};
 pub use types::{CognitiveTask, TaskPhase, Priority, TaskId};
+pub use error::CsError;
+pub use ids::CTID;
+pub use dependency_dag::DependencyDag;

@@ -2,7 +2,7 @@
 // Copyright 2026 XKernal Contributors
 //! Task lifecycle state machine for cognitive task phase transitions
 
-use crate::types::{CognitiveTask, TaskPhase};
+use crate::types::TaskPhase;
 use alloc::vec::Vec;
 use thiserror::Error;
 
@@ -85,6 +85,20 @@ impl From<TaskPhase> for TaskState {
             Checkpointed => TaskState::Checkpointed,
             Completed => TaskState::Completed,
             Failed => TaskState::Failed,
+        }
+    }
+}
+
+impl From<TaskState> for TaskPhase {
+    fn from(state: TaskState) -> Self {
+        match state {
+            TaskState::Init => TaskPhase::Init,
+            TaskState::Ready => TaskPhase::Ready,
+            TaskState::Running => TaskPhase::Running,
+            TaskState::Waiting => TaskPhase::Waiting,
+            TaskState::Checkpointed => TaskPhase::Checkpointed,
+            TaskState::Completed => TaskPhase::Completed,
+            TaskState::Failed => TaskPhase::Failed,
         }
     }
 }

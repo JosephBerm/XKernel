@@ -15,9 +15,9 @@
 
 extern crate alloc;
 
-use cs_ct_lifecycle::DependencyDag;
-use cs_ct_lifecycle::ids::CTID;
-use cs_ct_lifecycle::error::CsError;
+use ct_lifecycle::DependencyDag;
+use ct_lifecycle::ids::CTID;
+use ct_lifecycle::error::CsError;
 use alloc::collections::BTreeSet;
 use alloc::vec::Vec;
 use alloc::string::ToString;

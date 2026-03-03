@@ -25,7 +25,7 @@ pub mod exceptions;
 pub mod checkpoint;
 
 // Re-export commonly used types
-pub use ipc::{Channel, Message, IpcEndpoint};
-pub use signals::{Signal, SignalHandler, SignalDispatcher};
-pub use exceptions::{Exception, ExceptionHandler, FaultDispatcher};
-pub use checkpoint::{Checkpoint, CheckpointProvider, SnapshotFormat};
+pub use ipc::{Channel, Message, IpcEndpoint, SharedContext};
+pub use signals::{Signal, SignalHandler, SignalDispatcher, SimpleSignalHandler};
+pub use exceptions::{Exception, ExceptionHandler, ExceptionSeverity, FaultDispatcher, SimpleExceptionHandler};
+pub use checkpoint::{Checkpoint, CheckpointManager, CheckpointProvider, CrdtState, SnapshotFormat};

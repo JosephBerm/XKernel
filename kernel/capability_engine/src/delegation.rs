@@ -2,7 +2,7 @@
 // Copyright 2026 XKernal Contributors
 //! Capability delegation chains and attenuation rules
 
-use crate::capability::{Capability, CapabilityError, Permission, PermissionFlags};
+use crate::capability::{Capability, CapabilityError, Permission};
 use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
 
@@ -158,6 +158,7 @@ impl DelegationChain {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::capability::PermissionFlags;
 
     #[test]
     fn test_delegation_entry_creation() {

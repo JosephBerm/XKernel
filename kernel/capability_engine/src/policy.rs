@@ -2,6 +2,7 @@
 // Copyright 2026 XKernal Contributors
 //! Mandatory policy enforcement and Cognitive Policy Language (CPL)
 
+use alloc::boxed::Box;
 use crate::capability::{Capability, CapabilityError, PermissionFlags};
 use alloc::vec::Vec;
 use serde::{Deserialize, Serialize};
@@ -141,6 +142,7 @@ impl Default for PolicyEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
     use crate::capability::{Permission, PermissionFlags};
 
     #[test]

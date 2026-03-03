@@ -2,6 +2,7 @@
 // Copyright 2026 XKernal Contributors
 //! Memory management with arena allocator and memory pools
 
+use alloc::vec;
 use alloc::vec::Vec;
 use thiserror::Error;
 

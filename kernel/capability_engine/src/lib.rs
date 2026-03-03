@@ -27,6 +27,6 @@ pub mod verification;
 
 // Re-export commonly used types
 pub use capability::{Capability, CapabilityToken, Permission, PermissionFlags};
-pub use delegation::{DelegationChain, AttenuationRule, RevocationPolicy};
-pub use policy::{PolicyEngine, MandatoryPolicy};
-pub use verification::{Proof, VerificationResult};
+pub use delegation::{DelegationChain, DelegationEntry, AttenuationRule, RevocationPolicy};
+pub use policy::{PolicyEngine, MandatoryPolicy, PolicyExpression};
+pub use verification::{Proof, ProofType, VerificationEngine, VerificationPolicy, VerificationResult};
