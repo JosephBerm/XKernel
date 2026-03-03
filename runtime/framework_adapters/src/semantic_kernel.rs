@@ -11,7 +11,6 @@
 //! - Planner → CognitiveTask (Approximate fidelity)
 //! - KernelMemory → SemanticMemory (Partial fidelity)
 
-use alloc::string::String;
 use crate::adapter::{
     CognitiveTaskConfig, IFrameworkAdapter, SemanticChannelConfig, SemanticMemoryConfig,
     ToolBindingConfig, TranslationResult,
@@ -43,7 +42,7 @@ impl SemanticKernelAdapter {
     /// Maps a Semantic Kernel skill to ToolBinding.
     /// Sec 4.3: Skill Mapping (Full Fidelity)
     fn map_skill(&self, skill_def: &str) -> AdapterResult<ToolBindingConfig> {
-        let tool_id = alloc::format!("sk-skill-{}", ulid::Ulid::new());
+        let tool_id = format!("sk-skill-{}", ulid::Ulid::new());
 
         Ok(ToolBindingConfig {
             tool_id,
@@ -58,7 +57,7 @@ impl SemanticKernelAdapter {
     /// Maps a Semantic Kernel planner to CognitiveTask.
     /// Sec 4.3: Planner Mapping (Approximate Fidelity)
     fn map_planner(&self, planner_def: &str) -> AdapterResult<CognitiveTaskConfig> {
-        let task_id = alloc::format!("sk-plan-{}", ulid::Ulid::new());
+        let task_id = format!("sk-plan-{}", ulid::Ulid::new());
 
         Ok(CognitiveTaskConfig {
             task_id,
@@ -72,7 +71,7 @@ impl SemanticKernelAdapter {
     /// Maps Semantic Kernel memory to SemanticMemory.
     /// Sec 4.3: Memory Mapping (Partial Fidelity)
     fn map_kernel_memory(&self, memory_def: &str) -> AdapterResult<SemanticMemoryConfig> {
-        let memory_id = alloc::format!("sk-mem-{}", ulid::Ulid::new());
+        let memory_id = format!("sk-mem-{}", ulid::Ulid::new());
 
         Ok(SemanticMemoryConfig {
             memory_id,
@@ -136,7 +135,7 @@ impl IFrameworkAdapter for SemanticKernelAdapter {
             ));
         }
 
-        let channel_id = alloc::format!("sk-ch-{}", ulid::Ulid::new());
+        let channel_id = format!("sk-ch-{}", ulid::Ulid::new());
         Ok(SemanticChannelConfig {
             channel_id,
             name: "SemanticKernelChannel".to_string(),
@@ -164,8 +163,6 @@ impl IFrameworkAdapter for SemanticKernelAdapter {
 mod tests {
     use super::*;
 use ulid::Ulid;
-use alloc::format;
-use alloc::string::ToString;
 
     #[test]
     fn test_semantic_kernel_adapter_creation() {

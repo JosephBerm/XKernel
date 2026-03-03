@@ -5,8 +5,6 @@
 //! This module defines the foundational `FrameworkAdapter` trait that all framework adapters
 //! must implement, along with core types for adapter lifecycle, configuration, and event translation.
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Core performance target: P95 latency for adapter operations (milliseconds)
 pub const P95_LATENCY_TARGET_MS: u32 = 500;
@@ -82,43 +80,8 @@ impl AdapterConfig {
     }
 }
 
-/// Result type for adapter operations
-pub type AdapterResult<T> = core::result::Result<T, AdapterError>;
-
-/// Error types for adapter operations
-#[derive(Debug, Clone)]
-pub enum AdapterError {
-    /// Translation between frameworks failed
-    TranslationError(String),
-    /// Framework compatibility issue
-    FrameworkCompatibility(String),
-    /// IPC communication error
-    IpcError(String),
-    /// Memory limit exceeded
-    MemoryExceeded,
-    /// Timeout during operation
-    OperationTimeout,
-    /// Agent not found
-    AgentNotFound,
-    /// Configuration error
-    ConfigError(String),
-}
-
-impl core::fmt::Display for AdapterError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            AdapterError::TranslationError(msg) => write!(f, "Translation error: {}", msg),
-            AdapterError::FrameworkCompatibility(msg) => {
-                write!(f, "Framework compatibility error: {}", msg)
-            }
-            AdapterError::IpcError(msg) => write!(f, "IPC error: {}", msg),
-            AdapterError::MemoryExceeded => write!(f, "Memory limit exceeded"),
-            AdapterError::OperationTimeout => write!(f, "Operation timeout"),
-            AdapterError::AgentNotFound => write!(f, "Agent not found"),
-            AdapterError::ConfigError(msg) => write!(f, "Configuration error: {}", msg),
-        }
-    }
-}
+/// Re-export error types from the canonical error module.
+pub use crate::error::{AdapterError, AdapterResult};
 
 /// Main trait for framework adapters
 ///

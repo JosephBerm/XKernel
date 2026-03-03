@@ -17,9 +17,6 @@ mod lifecycle_integration_tests {
     use crate::lifecycle_manager::LifecycleManager;
     use crate::unit_file::AgentUnitFile;
     use crate::LifecycleState;
-use alloc::format;
-use alloc::string::ToString;
-use alloc::vec::Vec;
 
     fn create_test_unit_file(name: &str) -> AgentUnitFile {
         AgentUnitFile::new(name, "1.0.0", "Test agent")
@@ -92,7 +89,7 @@ use alloc::vec::Vec;
         let manager = LifecycleManager::new();
 
         // Start multiple agents
-        let mut process_ids = alloc::vec::Vec::new();
+        let mut process_ids = Vec::new();
         for i in 0..5 {
             let unit_file = create_test_unit_file(&format!("agent-{}", i));
             let params = AgentStartParams::new(

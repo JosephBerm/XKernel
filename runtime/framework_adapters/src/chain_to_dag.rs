@@ -11,7 +11,7 @@
 //! Sec 4.2: Chain-to-DAG Translation
 //! Sec 4.3: Chain Pattern Mapping
 
-use alloc::{string::String, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::{AdapterError, framework_type::FrameworkType};
 
 /// Unique identifier for a Cognitive Task
@@ -559,10 +559,7 @@ fn dfs_visit(dag: &CtDag, node: CTID, visited: &mut BTreeMap<CTID, bool>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_chain_type_as_str() {

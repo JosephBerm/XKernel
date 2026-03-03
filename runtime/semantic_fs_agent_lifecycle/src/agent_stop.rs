@@ -10,7 +10,6 @@
 
 use crate::lifecycle_manager::LifecycleManager;
 use crate::{LifecycleError, LifecycleState, Result};
-use alloc::string::{String, ToString};
 
 /// Signal types for agent termination.
 ///
@@ -187,7 +186,7 @@ impl AgentStopHandler {
         current_time_ms: u64,
     ) -> Result<bool> {
         if pid == 0 {
-            return Err(LifecycleError::LifecycleError(
+            return Err(LifecycleError::GenericError(
                 "Process ID cannot be zero".to_string(),
             ));
         }
@@ -231,7 +230,7 @@ impl AgentStopHandler {
         let signal_result = Self::send_signal(agent_id, pid, TerminationSignal::Terminate, current_time_ms);
 
         if !signal_result.sent {
-            return Err(LifecycleError::LifecycleError(
+            return Err(LifecycleError::GenericError(
                 signal_result.error_message.unwrap_or_else(|| "Failed to send signal".to_string()),
             ));
         }
@@ -262,7 +261,7 @@ impl AgentStopHandler {
         if signal_result.sent {
             Ok(())
         } else {
-            Err(LifecycleError::LifecycleError(
+            Err(LifecycleError::GenericError(
                 signal_result.error_message.unwrap_or_else(|| "Failed to send kill signal".to_string()),
             ))
         }
@@ -284,7 +283,7 @@ impl AgentStopHandler {
     /// - `Err` if cleanup failed
     pub fn cleanup_resources(agent_id: &str, _pid: u64) -> Result<()> {
         if agent_id.is_empty() {
-            return Err(LifecycleError::LifecycleError(
+            return Err(LifecycleError::GenericError(
                 "Agent ID cannot be empty".to_string(),
             ));
         }
@@ -350,8 +349,6 @@ mod tests {
     use super::*;
     use crate::lifecycle_manager::LifecycleManager;
     use crate::unit_file::AgentUnitFile;
-use alloc::string::String;
-use alloc::string::ToString;
 
     fn create_test_unit_file() -> AgentUnitFile {
         AgentUnitFile::new("test-agent", "1.0.0", "Test agent")

@@ -8,7 +8,6 @@
 //! Sec 3.5: CSCI Syscall Interface
 //! Sec 5.2: Framework Syscall Binding
 
-use alloc::{string::String, vec::Vec};
 use crate::error::AdapterError;
 use crate::AdapterResult;
 
@@ -222,7 +221,7 @@ pub trait SyscallBinding {
 #[derive(Debug, Clone)]
 pub struct MockSyscallBinding {
     /// Mock responses stored by request_id
-    responses: alloc::collections::BTreeMap<String, SyscallResponse>,
+    responses: std::collections::BTreeMap<String, SyscallResponse>,
     /// Recorded invocations
     invocations: Vec<SyscallRequest>,
 }
@@ -231,7 +230,7 @@ impl MockSyscallBinding {
     /// Creates a new mock binding.
     pub fn new() -> Self {
         MockSyscallBinding {
-            responses: alloc::collections::BTreeMap::new(),
+            responses: std::collections::BTreeMap::new(),
             invocations: Vec::new(),
         }
     }
@@ -283,30 +282,30 @@ impl SyscallBinding for MockSyscallBinding {
     ) -> AdapterResult<String> {
         let request = SyscallRequest::new(
             CsciSyscallId::TaskSpawn,
-            alloc::format!("spawn-{}", agent_id),
-            alloc::format!("{},{}", agent_id, task_name).into_bytes(),
+            format!("spawn-{}", agent_id),
+            format!("{},{}", agent_id, task_name).into_bytes(),
             timeout_ms,
         );
         self.invoke_syscall(request)?;
-        Ok(alloc::format!("task-{}", agent_id))
+        Ok(format!("task-{}", agent_id))
     }
 
     fn wait_task(&self, task_id: &str, timeout_ms: u64) -> AdapterResult<String> {
         let request = SyscallRequest::new(
             CsciSyscallId::TaskWait,
-            alloc::format!("wait-{}", task_id),
+            format!("wait-{}", task_id),
             task_id.as_bytes().to_vec(),
             timeout_ms,
         );
         self.invoke_syscall(request)?;
-        Ok(alloc::format!("result-{}", task_id))
+        Ok(format!("result-{}", task_id))
     }
 
     fn bind_tool(&self, agent_id: &str, tool_id: &str) -> AdapterResult<()> {
         let request = SyscallRequest::new(
             CsciSyscallId::ToolBind,
-            alloc::format!("bind-{}-{}", agent_id, tool_id),
-            alloc::format!("{},{}", agent_id, tool_id).into_bytes(),
+            format!("bind-{}-{}", agent_id, tool_id),
+            format!("{},{}", agent_id, tool_id).into_bytes(),
             5000,
         );
         self.invoke_syscall(request)?;
@@ -316,12 +315,12 @@ impl SyscallBinding for MockSyscallBinding {
     fn invoke_tool(&self, tool_id: &str, args: &str) -> AdapterResult<String> {
         let request = SyscallRequest::new(
             CsciSyscallId::ToolInvoke,
-            alloc::format!("invoke-{}", tool_id),
+            format!("invoke-{}", tool_id),
             args.as_bytes().to_vec(),
             10000,
         );
         self.invoke_syscall(request)?;
-        Ok(alloc::format!("tool-result-{}", tool_id))
+        Ok(format!("tool-result-{}", tool_id))
     }
 
     fn create_channel(&self, channel_type: &str) -> AdapterResult<String> {
@@ -338,8 +337,8 @@ impl SyscallBinding for MockSyscallBinding {
     fn send_channel(&self, channel_id: &str, message: &str) -> AdapterResult<()> {
         let request = SyscallRequest::new(
             CsciSyscallId::ChannelSend,
-            alloc::format!("send-{}", channel_id),
-            alloc::format!("{},{}", channel_id, message).into_bytes(),
+            format!("send-{}", channel_id),
+            format!("{},{}", channel_id, message).into_bytes(),
             5000,
         );
         self.invoke_syscall(request)?;
@@ -349,8 +348,8 @@ impl SyscallBinding for MockSyscallBinding {
     fn grant_capability(&self, entity_id: &str, cap_id: &str) -> AdapterResult<()> {
         let request = SyscallRequest::new(
             CsciSyscallId::CapGrant,
-            alloc::format!("grant-{}-{}", entity_id, cap_id),
-            alloc::format!("{},{}", entity_id, cap_id).into_bytes(),
+            format!("grant-{}-{}", entity_id, cap_id),
+            format!("{},{}", entity_id, cap_id).into_bytes(),
             1000,
         );
         self.invoke_syscall(request)?;
@@ -360,8 +359,8 @@ impl SyscallBinding for MockSyscallBinding {
     fn revoke_capability(&self, entity_id: &str, cap_id: &str) -> AdapterResult<()> {
         let request = SyscallRequest::new(
             CsciSyscallId::CapRevoke,
-            alloc::format!("revoke-{}-{}", entity_id, cap_id),
-            alloc::format!("{},{}", entity_id, cap_id).into_bytes(),
+            format!("revoke-{}-{}", entity_id, cap_id),
+            format!("{},{}", entity_id, cap_id).into_bytes(),
             1000,
         );
         self.invoke_syscall(request)?;
@@ -371,8 +370,8 @@ impl SyscallBinding for MockSyscallBinding {
     fn write_memory(&self, memory_id: &str, data: &str) -> AdapterResult<()> {
         let request = SyscallRequest::new(
             CsciSyscallId::MemWrite,
-            alloc::format!("write-{}", memory_id),
-            alloc::format!("{},{}", memory_id, data).into_bytes(),
+            format!("write-{}", memory_id),
+            format!("{},{}", memory_id, data).into_bytes(),
             2000,
         );
         self.invoke_syscall(request)?;
@@ -382,23 +381,19 @@ impl SyscallBinding for MockSyscallBinding {
     fn read_memory(&self, memory_id: &str) -> AdapterResult<String> {
         let request = SyscallRequest::new(
             CsciSyscallId::MemRead,
-            alloc::format!("read-{}", memory_id),
+            format!("read-{}", memory_id),
             memory_id.as_bytes().to_vec(),
             2000,
         );
         self.invoke_syscall(request)?;
-        Ok(alloc::format!("data-{}", memory_id))
+        Ok(format!("data-{}", memory_id))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_csci_syscall_id_as_u32() {

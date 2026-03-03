@@ -5,8 +5,6 @@
 //! Provides mechanisms to translate CEF (Common Event Format) events and map framework
 //! capabilities to CSCI representations.
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Translation layer for CEF events to CSCI format
 pub struct CefEventTranslator;

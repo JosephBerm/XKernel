@@ -5,8 +5,6 @@
 //! Provides mount implementations for local filesystem, HTTP, S3,
 //! database, and custom plugin mounts.
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Trait for mount providers
 pub trait MountProvider {

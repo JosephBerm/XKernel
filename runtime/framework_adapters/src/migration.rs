@@ -5,8 +5,6 @@
 //! Provides CLI tools and validators for migrating between framework versions
 //! and validating adapter configurations.
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// CLI tool for adapter migration and validation
 pub struct AdapterMigrationTool;

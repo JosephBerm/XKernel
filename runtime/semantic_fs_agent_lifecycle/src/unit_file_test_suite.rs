@@ -436,7 +436,6 @@ pub fn validate_all_test_cases() -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::vec::Vec;
 
     #[test]
     fn test_minimal_valid_not_empty() {
@@ -489,7 +488,7 @@ use alloc::vec::Vec;
 
     #[test]
     fn test_test_case_uniqueness() {
-        let mut names = alloc::vec::Vec::new();
+        let mut names = Vec::new();
         for (name, _, _) in ALL_TEST_CASES {
             assert!(!names.contains(name), "Duplicate test case name: {}", name);
             names.push(name);

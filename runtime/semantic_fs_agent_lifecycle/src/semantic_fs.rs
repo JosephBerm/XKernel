@@ -5,8 +5,6 @@
 //! Provides query engine, tag system, path resolver, and mount manager
 //! for managing agent resources within a semantic filesystem.
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Query engine for semantic filesystem operations
 pub struct QueryEngine;

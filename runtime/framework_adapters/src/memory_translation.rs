@@ -11,7 +11,6 @@
 //! Sec 4.2: Memory Translation Interface
 //! Sec 4.2: Memory Tier Assignment
 
-use alloc::{string::String, vec::Vec};
 use crate::{AdapterError, framework_type::FrameworkType};
 
 /// Framework memory types requiring translation.
@@ -326,9 +325,6 @@ fn estimate_memory_size(framework_memory: &FrameworkMemory) -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::vec::Vec;
 
     #[test]
     fn test_memory_type_class_as_str() {

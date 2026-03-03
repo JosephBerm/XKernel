@@ -5,8 +5,6 @@
 //! Provides core agent lifecycle management including state transitions,
 //! health monitoring, and automatic restart capabilities.
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Agent lifecycle state enumeration
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

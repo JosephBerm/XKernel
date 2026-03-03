@@ -8,10 +8,10 @@
 
 use crate::error::AdapterError;
 use crate::AdapterResult;
-use alloc::sync::Arc; // RwLock not available in no_std
-use alloc::collections::BTreeMap; use alloc::vec::Vec;
+use std::sync::{Arc, RwLock};
+use std::collections::BTreeMap;
 use core::fmt;
-use alloc::collections::BTreeMap as HashMap;
+use std::collections::BTreeMap as HashMap;
 
 /// Type-state marker for Initialized state
 #[derive(Clone, Copy, Debug)]
@@ -260,12 +260,7 @@ impl RuntimeAdapterRef<Ready> {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::sync::Arc;
-use alloc::vec::Vec;
-use alloc::vec;
+use std::sync::Arc;
 
     #[test]
     fn test_state_machine_valid_transition() -> AdapterResult<()> {

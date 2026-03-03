@@ -15,9 +15,7 @@
 //! Reference: Engineering Plan § Agent Lifecycle Management § Unit Files § Migration
 
 use crate::AgentUnitFile;
-use alloc::collections::BTreeMap;
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 
 /// Migration result type.
 pub type MigrationResult<T> = core::result::Result<T, MigrationError>;
@@ -157,7 +155,7 @@ impl EnvironmentMigrator {
 
         // Migrate optional agent fields
         if let Some(framework) = legacy_config.get_optional("FRAMEWORK") {
-            unit_file.metadata.with_author(framework);
+            unit_file.metadata = unit_file.metadata.with_author(framework);
         }
 
         if let Some(author) = legacy_config.get_optional("AUTHOR") {
@@ -247,63 +245,44 @@ impl EnvironmentMigrator {
         // Migrate health check configuration
         if legacy_config.env.contains_key("HEALTH_CHECK_TYPE") {
             let check_type = legacy_config.get_optional("HEALTH_CHECK_TYPE");
-            let endpoint = legacy_config.get_optional("HEALTH_CHECK_ENDPOINT");
+            let endpoint = legacy_config.get_optional("HEALTH_CHECK_ENDPOINT")
+                .unwrap_or_default();
 
-            let probe_type = match check_type.as_deref() {
-                Some("http") => crate::HealthProbeType::Http,
-                Some("tcp") => crate::HealthProbeType::Tcp,
-                Some("exec") => crate::HealthProbeType::Exec,
-                Some("csci") => crate::HealthProbeType::Csci,
-                _ => crate::HealthProbeType::Http,
+            let check_type_enum = match check_type.as_deref() {
+                Some("http") => crate::HealthCheckType::Http(endpoint.clone()),
+                Some("tcp") => crate::HealthCheckType::Tcp(endpoint.parse::<u16>().unwrap_or(8080)),
+                Some("exec") => crate::HealthCheckType::Exec(endpoint.clone()),
+                Some("csci") => crate::HealthCheckType::CsciSyscall(endpoint.clone()),
+                _ => crate::HealthCheckType::Http(endpoint.clone()),
             };
 
-            let probe = crate::HealthProbe {
-                probe_type,
-                endpoint: endpoint.as_deref().map(|e| crate::HealthEndpoint::from_str(e)).transpose()?,
-            };
-
-            let schedule = crate::ProbeSchedule {
-                initial_delay_ms: 0,
+            let health_config = crate::HealthCheckConfig {
+                check_type: check_type_enum,
                 interval_ms: 10000,
                 timeout_ms: 5000,
                 failure_threshold: 3,
                 success_threshold: 1,
             };
 
-            let health_check = crate::HealthCheckConfig {
-                readiness: Some(probe.clone()),
-                liveness: Some(probe),
-                readiness_schedule: Some(schedule.clone()),
-                liveness_schedule: Some(schedule),
+            let probe = crate::HealthProbe {
+                config: health_config,
+                initial_delay_ms: 0,
             };
 
             let mut lifecycle = crate::LifecycleConfig::default();
-            lifecycle.readiness_probe = health_check.readiness.clone();
-            lifecycle.liveness_probe = health_check.liveness.clone();
-            lifecycle.readiness_schedule = health_check.readiness_schedule.clone();
-            lifecycle.liveness_schedule = health_check.liveness_schedule.clone();
+            lifecycle.readiness_probe = Some(probe.clone());
+            lifecycle.liveness_probe = Some(probe);
 
             unit_file = unit_file.with_lifecycle_config(lifecycle);
         }
 
         // Migrate restart configuration
-        if let Some(max_retries_str) = legacy_config.get_optional("MAX_RETRIES") {
-            if let Ok(max_retries) = max_retries_str.parse::<u32>() {
-                let backoff = crate::BackoffConfig {
-                    base_ms: 100,
-                    multiplier: 2.0,
-                    max_ms: 30000,
-                };
+        if let Some(_max_retries_str) = legacy_config.get_optional("MAX_RETRIES") {
+            let restart_policy = crate::RestartPolicy::OnFailure;
 
-                let restart_policy = crate::RestartPolicy::OnFailure(crate::OnFailureRestartPolicy {
-                    max_retries,
-                    backoff,
-                });
-
-                let mut lifecycle = unit_file.lifecycle_config.clone();
-                lifecycle.restart_policy = restart_policy;
-                unit_file = unit_file.with_lifecycle_config(lifecycle);
-            }
+            let mut lifecycle = unit_file.lifecycle_config.clone();
+            lifecycle.restart_policy = restart_policy;
+            unit_file = unit_file.with_lifecycle_config(lifecycle);
         }
 
         Ok(unit_file)
@@ -389,9 +368,6 @@ pub const LEGACY_FIELD_MAPPING: &[(&str, &str, &str)] = &[
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
 
     #[test]
     fn test_environment_migrator_simple() {

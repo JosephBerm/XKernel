@@ -11,7 +11,6 @@
 use crate::health_check::HealthProbe;
 use crate::restart_policy::RestartPolicy;
 use crate::{LifecycleError, Result};
-use alloc::vec::Vec;
 
 /// Agent lifecycle configuration.
 ///
@@ -257,7 +256,6 @@ impl LifecycleState {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
 
     #[test]
     fn test_lifecycle_config_default() {

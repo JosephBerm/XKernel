@@ -20,9 +20,7 @@
 
 use crate::unit_file::AgentUnitFile;
 use crate::{LifecycleError, LifecycleState, Result};
-use alloc::collections::BTreeMap;
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 use core::cell::RefCell;
 
 /// Agent lifecycle manager state.
@@ -215,7 +213,7 @@ impl LifecycleManager {
         let mut agents = self.agents.borrow_mut();
 
         if agents.contains_key(&agent_id) {
-            return Err(LifecycleError::LifecycleError(format!(
+            return Err(LifecycleError::GenericError(format!(
                 "Agent {} already registered",
                 agent_id
             )));
@@ -247,7 +245,7 @@ impl LifecycleManager {
         if agents.remove(agent_id).is_some() {
             Ok(())
         } else {
-            Err(LifecycleError::LifecycleError(format!(
+            Err(LifecycleError::GenericError(format!(
                 "Agent {} not found",
                 agent_id
             )))
@@ -269,7 +267,7 @@ impl LifecycleManager {
         agents
             .get(agent_id)
             .map(|a| a.state)
-            .ok_or_else(|| LifecycleError::LifecycleError(format!("Agent {} not found", agent_id)))
+            .ok_or_else(|| LifecycleError::GenericError(format!("Agent {} not found", agent_id)))
     }
 
     /// Transitions an agent to a new state.
@@ -298,7 +296,7 @@ impl LifecycleManager {
 
         let agent = agents
             .get_mut(agent_id)
-            .ok_or_else(|| LifecycleError::LifecycleError(format!("Agent {} not found", agent_id)))?;
+            .ok_or_else(|| LifecycleError::GenericError(format!("Agent {} not found", agent_id)))?;
 
         agent.transition_to(target_state, current_time_ms)
     }
@@ -319,7 +317,7 @@ impl LifecycleManager {
 
         let agent = agents
             .get_mut(agent_id)
-            .ok_or_else(|| LifecycleError::LifecycleError(format!("Agent {} not found", agent_id)))?;
+            .ok_or_else(|| LifecycleError::GenericError(format!("Agent {} not found", agent_id)))?;
 
         agent.set_error(error);
         Ok(())
@@ -341,7 +339,7 @@ impl LifecycleManager {
 
         let agent = agents
             .get_mut(agent_id)
-            .ok_or_else(|| LifecycleError::LifecycleError(format!("Agent {} not found", agent_id)))?;
+            .ok_or_else(|| LifecycleError::GenericError(format!("Agent {} not found", agent_id)))?;
 
         agent.set_ct_process_id(pid);
         Ok(())
@@ -362,7 +360,7 @@ impl LifecycleManager {
 
         let agent = agents
             .get_mut(agent_id)
-            .ok_or_else(|| LifecycleError::LifecycleError(format!("Agent {} not found", agent_id)))?;
+            .ok_or_else(|| LifecycleError::GenericError(format!("Agent {} not found", agent_id)))?;
 
         agent.increment_restart_count();
         Ok(agent.restart_count)
@@ -435,7 +433,7 @@ impl LifecycleManager {
         agents
             .get(agent_id)
             .cloned()
-            .ok_or_else(|| LifecycleError::LifecycleError(format!("Agent {} not found", agent_id)))
+            .ok_or_else(|| LifecycleError::GenericError(format!("Agent {} not found", agent_id)))
     }
 
     /// Returns total number of registered agents.
@@ -453,9 +451,6 @@ impl Default for LifecycleManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
 
     fn create_test_unit_file() -> AgentUnitFile {
         AgentUnitFile::new("test-agent", "1.0.0", "Test agent")

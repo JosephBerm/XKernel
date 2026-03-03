@@ -8,7 +8,6 @@
 //! Sec 4.3: Concept Mapping Matrix
 //! Sec 5.1: Translation Fidelity Tracking
 
-use alloc::{string::String, vec::Vec};
 
 /// Framework-specific concepts that require mapping to CSCI entities.
 /// Sec 4.3: Framework Concept Taxonomy
@@ -311,8 +310,6 @@ impl Default for MappingMatrix {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::string::String;
-use alloc::vec::Vec;
 
     #[test]
     fn test_framework_concept_as_str() {

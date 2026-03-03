@@ -5,7 +5,6 @@
 //! Identifies and categorizes external framework types supported by the adapter subsystem.
 //! Sec 4.2: Framework Type Classification
 
-use alloc::string::String;
 
 /// Enumeration of supported external frameworks.
 /// Sec 4.2: Framework Support Matrix

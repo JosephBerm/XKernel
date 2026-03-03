@@ -10,7 +10,6 @@
 //! Sec 4.2: Adapter-Kernel IPC Protocol
 //! Sec 4.2: Message Format Specification
 
-use alloc::string::String;
 use crate::framework_type::FrameworkType;
 use crate::runtime_adapter_ref::{CTPhase, CTID};
 

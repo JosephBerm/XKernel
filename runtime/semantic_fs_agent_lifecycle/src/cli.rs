@@ -5,8 +5,6 @@
 //! Provides command-line interface for starting, stopping, querying,
 //! and managing agent lifecycle operations.
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Command-line interface for agent control
 pub struct AgentCtl;

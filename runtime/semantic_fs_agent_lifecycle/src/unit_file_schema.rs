@@ -7,9 +7,7 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management § Unit Files § TOML Schema
 
-use alloc::collections::BTreeMap;
-use alloc::string::String;
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 use core::fmt;
 
 /// TOML schema errors.
@@ -94,7 +92,7 @@ impl AgentFramework {
             "custom" => Ok(Self::Custom),
             other => Err(UnitFileError::InvalidValue {
                 field: "framework".to_string(),
-                reason: alloc::format!("Unknown framework: {}", other),
+                reason: format!("Unknown framework: {}", other),
             }),
         }
     }
@@ -111,34 +109,7 @@ impl AgentFramework {
     }
 }
 
-/// Health check type.
-///
-/// Specifies the type of health check to perform.
-///
-/// Reference: Engineering Plan § Agent Lifecycle Management § Unit Files § Health Checks
-", other),
-            ),
-        
-    
-
-    /// Returns string representation.
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            Self::Http => "http",
-            Self::Tcp => "tcp",
-            Self::Exec => "exec",
-            Self::Csci => "csci",
-        }
-    }
-
-
-/// Restart policy type.
-///
-/// Specifies the restart behavior for agents.
-///
-/// Reference: Engineering Plan § Agent Lifecycle Management § Unit Files § Restart Policies
-#[derive(Debug, Clone, PartialEq, Eq)]
-/// Health check type.
+/// Health check type used in unit file schema.
 ///
 /// Specifies the type of health check to perform.
 ///
@@ -164,8 +135,8 @@ impl UnitFileHealthCheckType {
             "exec" => Ok(Self::Exec),
             "csci" => Ok(Self::Csci),
             other => Err(UnitFileError::InvalidValue {
-                field: "health_check.type".to_string(),
-                reason: alloc::format!("Unknown health check type: {}", other),
+                field: "health_check_type".to_string(),
+                reason: format!("Unknown health check type: {}", other),
             }),
         }
     }
@@ -181,6 +152,7 @@ impl UnitFileHealthCheckType {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub enum RestartPolicyType {
     /// Always restart the agent.
     Always,
@@ -198,8 +170,8 @@ impl RestartPolicyType {
             "on_failure" | "onfailure" => Ok(Self::OnFailure),
             "never" => Ok(Self::Never),
             other => Err(UnitFileError::InvalidValue {
-                field: "restart.policy".to_string(),
-                reason: alloc::format!("Unknown restart policy: {}", other),
+                field: "restart_policy".to_string(),
+                reason: format!("Unknown restart policy: {}", other),
             }),
         }
     }
@@ -238,7 +210,7 @@ pub struct AgentSection {
 pub struct ModelSection {
     /// Model provider (e.g., "openai", "anthropic", "ollama").
     pub provider: Option<String>,
-    /// Model name (e.g., "gpt-4", "claude-opus").
+    /// Model name (e.g., `gpt-4`, `claude-opus`).
     pub model_name: Option<String>,
     /// Maximum tokens for completion.
     pub max_tokens: Option<u32>,
@@ -357,11 +329,11 @@ pub struct CrewSection {
 ///
 /// # TOML Format
 ///
-/// ```toml
+/// ```text
 /// [agent]
-/// name = "my-agent"
+/// name = "my_agent"
 /// version = "1.0.0"
-/// description = "An example agent"
+/// description = "An example agent configuration"
 /// framework = "langchain"
 ///
 /// [model]
@@ -528,15 +500,13 @@ impl AgentUnitFileSchema {
 
     /// Gets the agent identifier string.
     pub fn identifier(&self) -> String {
-        alloc::format!("{}/{}", self.agent.name, self.agent.version)
+        format!("{}/{}", self.agent.name, self.agent.version)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::ToString;
 
     #[test]
     fn test_agent_framework_parsing() {

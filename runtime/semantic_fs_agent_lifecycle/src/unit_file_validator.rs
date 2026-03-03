@@ -7,10 +7,8 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management § Unit Files § Validation
 
-use crate::unit_file_schema::{AgentUnitFileSchema, HealthCheckType, RestartPolicyType, UnitFileError, UnitFileResult};
-use alloc::collections::BTreeSet;
-use alloc::string::String;
-use alloc::vec::Vec;
+use crate::unit_file_schema::{AgentUnitFileSchema, UnitFileHealthCheckType, RestartPolicyType, UnitFileError, UnitFileResult};
+use std::collections::BTreeSet;
 use core::fmt;
 
 /// Error type for validation failures.
@@ -141,7 +139,7 @@ impl ValidationRule for ResourceLimitsRule {
                 if mem > self.max_memory_bytes {
                     errors.push(ValidationError {
                         rule_name: self.rule_name().to_string(),
-                        message: alloc::format!(
+                        message: format!(
                             "Memory limit {} exceeds system max {}",
                             mem, self.max_memory_bytes
                         ),
@@ -153,7 +151,7 @@ impl ValidationRule for ResourceLimitsRule {
                 if gpu > self.max_gpu_ms {
                     errors.push(ValidationError {
                         rule_name: self.rule_name().to_string(),
-                        message: alloc::format!(
+                        message: format!(
                             "GPU time limit {} exceeds system max {}",
                             gpu, self.max_gpu_ms
                         ),
@@ -165,7 +163,7 @@ impl ValidationRule for ResourceLimitsRule {
                 if wall_clock > self.max_wall_clock_ms {
                     errors.push(ValidationError {
                         rule_name: self.rule_name().to_string(),
-                        message: alloc::format!(
+                        message: format!(
                             "Wall clock limit {} exceeds system max {}",
                             wall_clock, self.max_wall_clock_ms
                         ),
@@ -187,7 +185,7 @@ impl ValidationRule for ResourceLimitsRule {
                 if tokens > self.max_tokens_per_task {
                     errors.push(ValidationError {
                         rule_name: self.rule_name().to_string(),
-                        message: alloc::format!(
+                        message: format!(
                             "Token limit {} exceeds system max {}",
                             tokens, self.max_tokens_per_task
                         ),
@@ -229,7 +227,7 @@ impl ValidationRule for DependencyConsistencyRule {
                 if after.contains(&schema.agent.name) {
                     errors.push(ValidationError {
                         rule_name: self.rule_name().to_string(),
-                        message: alloc::format!(
+                        message: format!(
                             "Agent {} cannot depend on itself in 'after' clause",
                             schema.agent.name
                         ),
@@ -241,7 +239,7 @@ impl ValidationRule for DependencyConsistencyRule {
                 if before.contains(&schema.agent.name) {
                     errors.push(ValidationError {
                         rule_name: self.rule_name().to_string(),
-                        message: alloc::format!(
+                        message: format!(
                             "Agent {} cannot depend on itself in 'before' clause",
                             schema.agent.name
                         ),
@@ -339,14 +337,14 @@ impl ValidationRule for CapabilityExistenceRule {
                     if !self.valid_capabilities.contains(cap.as_str()) {
                         errors.push(ValidationError {
                             rule_name: self.rule_name().to_string(),
-                            message: alloc::format!("Unknown required capability: {}", cap),
+                            message: format!("Unknown required capability: {}", cap),
                         });
                     }
 
                     if seen.contains(cap) {
                         errors.push(ValidationError {
                             rule_name: self.rule_name().to_string(),
-                            message: alloc::format!("Duplicate capability in required list: {}", cap),
+                            message: format!("Duplicate capability in required list: {}", cap),
                         });
                     }
                     seen.insert(cap.clone());
@@ -358,14 +356,14 @@ impl ValidationRule for CapabilityExistenceRule {
                     if !self.valid_capabilities.contains(cap.as_str()) {
                         errors.push(ValidationError {
                             rule_name: self.rule_name().to_string(),
-                            message: alloc::format!("Unknown optional capability: {}", cap),
+                            message: format!("Unknown optional capability: {}", cap),
                         });
                     }
 
                     if seen.contains(cap) {
                         errors.push(ValidationError {
                             rule_name: self.rule_name().to_string(),
-                            message: alloc::format!("Duplicate capability across required/optional: {}", cap),
+                            message: format!("Duplicate capability across required/optional: {}", cap),
                         });
                     }
                     seen.insert(cap.clone());
@@ -403,10 +401,10 @@ impl ValidationRule for HealthCheckRule {
         if let Some(hc) = &schema.health_check {
             // Validate check type
             if let Some(check_type) = &hc.check_type {
-                if HealthCheckType::from_str(check_type).is_err() {
+                if UnitFileHealthCheckType::from_str(check_type).is_err() {
                     errors.push(ValidationError {
                         rule_name: self.rule_name().to_string(),
-                        message: alloc::format!("Invalid health check type: {}", check_type),
+                        message: format!("Invalid health check type: {}", check_type),
                     });
                 }
             }
@@ -494,7 +492,7 @@ impl ValidationRule for RestartPolicyRule {
                 if RestartPolicyType::from_str(policy).is_err() {
                     errors.push(ValidationError {
                         rule_name: self.rule_name().to_string(),
-                        message: alloc::format!("Invalid restart policy: {}", policy),
+                        message: format!("Invalid restart policy: {}", policy),
                     });
                 }
             }
@@ -560,7 +558,7 @@ impl ValidationRule for RestartPolicyRule {
 #[derive(Debug)]
 pub struct ValidationEngine {
     /// Registered validation rules.
-    rules: Vec<alloc::boxed::Box<dyn ValidationRule>>,
+    rules: Vec<Box<dyn ValidationRule>>,
 }
 
 impl ValidationEngine {
@@ -572,19 +570,19 @@ impl ValidationEngine {
     }
 
     /// Adds a validation rule to the engine.
-    pub fn add_rule(&mut self, rule: alloc::boxed::Box<dyn ValidationRule>) {
+    pub fn add_rule(&mut self, rule: Box<dyn ValidationRule>) {
         self.rules.push(rule);
     }
 
     /// Creates a validation engine with all standard rules.
     pub fn with_standard_rules() -> Self {
         let mut engine = Self::new();
-        engine.add_rule(alloc::boxed::Box::new(RequiredFieldsRule));
-        engine.add_rule(alloc::boxed::Box::new(ResourceLimitsRule::default()));
-        engine.add_rule(alloc::boxed::Box::new(DependencyConsistencyRule));
-        engine.add_rule(alloc::boxed::Box::new(CapabilityExistenceRule::default()));
-        engine.add_rule(alloc::boxed::Box::new(HealthCheckRule));
-        engine.add_rule(alloc::boxed::Box::new(RestartPolicyRule));
+        engine.add_rule(Box::new(RequiredFieldsRule));
+        engine.add_rule(Box::new(ResourceLimitsRule::default()));
+        engine.add_rule(Box::new(DependencyConsistencyRule));
+        engine.add_rule(Box::new(CapabilityExistenceRule::default()));
+        engine.add_rule(Box::new(HealthCheckRule));
+        engine.add_rule(Box::new(RestartPolicyRule));
         engine
     }
 
@@ -618,10 +616,6 @@ impl Default for ValidationEngine {
 mod tests {
     use super::*;
     use crate::unit_file_schema::{AgentSection, AgentUnitFileSchema};
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::ToString;
-use alloc::vec;
 
     #[test]
     fn test_required_fields_rule_valid() {
@@ -649,7 +643,7 @@ use alloc::vec;
     fn test_dependency_consistency_rule_no_self_dependency() {
         let mut schema = AgentUnitFileSchema::new("agent-a", "1.0.0", "Test");
         let mut deps = crate::unit_file_schema::DependenciesSection {
-            after: Some(alloc::vec!["agent-a".to_string()]),
+            after: Some(vec!["agent-a".to_string()]),
             before: None,
             requires: None,
         };

@@ -12,9 +12,9 @@
 
 use crate::error::AdapterError;
 use crate::AdapterResult;
-use alloc::collections::BTreeMap; use alloc::vec::Vec;
+use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
-use alloc::collections::BTreeMap as HashMap;
+use std::collections::BTreeMap as HashMap;
 
 /// FFI signature for a syscall binding
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -83,7 +83,7 @@ impl MemorySyscalls {
         Ok(MemoryPointer {
             address: 0x1000 + size_bytes, // Simulated allocation
             size: size_bytes,
-            alignment,
+            alignment: align,
         })
     }
 
@@ -786,10 +786,6 @@ pub struct CapabilityAudit {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
 
     #[test]
     fn test_mem_alloc() -> AdapterResult<()> {

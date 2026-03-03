@@ -8,8 +8,6 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management § Synthesis
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Type of mapping relationship between lifecycle config and unit file.
 ///
@@ -625,14 +623,14 @@ impl UnitFileRequirements {
         let mut req = Self::new();
 
         // Required sections
-        req.required_sections = alloc::vec![
+        req.required_sections = vec![
             "[metadata]".to_string(),
             "[lifecycle]".to_string(),
             "[restart]".to_string(),
         ];
 
         // Mandatory features
-        req.mandatory_features = alloc::vec![
+        req.mandatory_features = vec![
             "Agent name and version".to_string(),
             "Startup timeout configuration".to_string(),
             "Shutdown timeout configuration".to_string(),
@@ -642,7 +640,7 @@ impl UnitFileRequirements {
         ];
 
         // Recommended features
-        req.recommended_features = alloc::vec![
+        req.recommended_features = vec![
             "Readiness probe configuration".to_string(),
             "Liveness probe configuration".to_string(),
             "HTTP GET, TCP, Exec, CSCI, and Custom gRPC probe types".to_string(),
@@ -653,7 +651,7 @@ impl UnitFileRequirements {
         ];
 
         // Optional features
-        req.optional_features = alloc::vec![
+        req.optional_features = vec![
             "Startup probe configuration".to_string(),
             "Custom health check handlers".to_string(),
             "Metrics collection configuration".to_string(),
@@ -662,7 +660,7 @@ impl UnitFileRequirements {
         ];
 
         // Constraints
-        req.constraints = alloc::vec![
+        req.constraints = vec![
             "All timeout values must be in milliseconds".to_string(),
             "Backoff multiplier must be positive number".to_string(),
             "Failure and success thresholds must be positive integers".to_string(),
@@ -722,9 +720,6 @@ impl Default for UnitFileRequirements {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::ToString;
-use alloc::vec;
 
     // MappingType tests
     #[test]

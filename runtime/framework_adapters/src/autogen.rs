@@ -11,7 +11,6 @@
 //! - Function → ToolBinding (Full fidelity)
 //! - Conversation → SemanticChannel (Partial fidelity)
 
-use alloc::string::String;
 use crate::adapter::{
     CognitiveTaskConfig, IFrameworkAdapter, SemanticChannelConfig, SemanticMemoryConfig,
     ToolBindingConfig, TranslationResult,
@@ -43,7 +42,7 @@ impl AutoGenAdapter {
     /// Maps AutoGen function to ToolBinding.
     /// Sec 4.3: Function Mapping (Full Fidelity)
     fn map_function(&self, function_def: &str) -> AdapterResult<ToolBindingConfig> {
-        let tool_id = alloc::format!("autogen-func-{}", ulid::Ulid::new());
+        let tool_id = format!("autogen-func-{}", ulid::Ulid::new());
 
         Ok(ToolBindingConfig {
             tool_id,
@@ -58,7 +57,7 @@ impl AutoGenAdapter {
     /// Maps AutoGen conversation to SemanticChannel.
     /// Sec 4.3: Conversation Mapping (Partial Fidelity)
     fn map_conversation(&self, conv_def: &str) -> AdapterResult<SemanticChannelConfig> {
-        let channel_id = alloc::format!("autogen-conv-{}", ulid::Ulid::new());
+        let channel_id = format!("autogen-conv-{}", ulid::Ulid::new());
 
         Ok(SemanticChannelConfig {
             channel_id,
@@ -72,7 +71,7 @@ impl AutoGenAdapter {
     /// Maps AutoGen agent to cognitive task.
     /// Sec 4.3: Agent Task Mapping
     fn map_agent_task(&self, agent_def: &str) -> AdapterResult<CognitiveTaskConfig> {
-        let task_id = alloc::format!("autogen-agent-{}", ulid::Ulid::new());
+        let task_id = format!("autogen-agent-{}", ulid::Ulid::new());
 
         Ok(CognitiveTaskConfig {
             task_id,
@@ -117,7 +116,7 @@ impl IFrameworkAdapter for AutoGenAdapter {
             ));
         }
 
-        let memory_id = alloc::format!("autogen-mem-{}", ulid::Ulid::new());
+        let memory_id = format!("autogen-mem-{}", ulid::Ulid::new());
         Ok(SemanticMemoryConfig {
             memory_id,
             memory_type: "conversation_history".to_string(),
@@ -162,8 +161,6 @@ impl IFrameworkAdapter for AutoGenAdapter {
 mod tests {
     use super::*;
 use ulid::Ulid;
-use alloc::format;
-use alloc::string::ToString;
 
     #[test]
     fn test_autogen_adapter_creation() {

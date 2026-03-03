@@ -10,8 +10,7 @@
 //! Sec 5.2: Lifecycle State Management
 //! Sec 5.3: Lifecycle Transition Validation
 
-use alloc::{string::String, vec::Vec};
-use alloc::collections::BTreeMap;
+use std::collections::BTreeMap;
 
 /// Generic lifecycle container for tracking entity state transitions.
 ///
@@ -451,10 +450,6 @@ impl MemoryLifecycleValidator {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::vec;
 
     #[test]
     fn test_entity_lifecycle_creation() {

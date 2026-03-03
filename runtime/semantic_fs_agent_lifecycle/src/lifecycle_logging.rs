@@ -4,12 +4,12 @@
 //! log levels, rotation support, and queryable interfaces.
 //! See RFC: Week 6 Lifecycle Logging subsystem design.
 
-use alloc::collections::VecDeque;
-// use std::fs removed - not available in no_std
-use core::fmt::Write; // core Write instead of std::io
-use alloc::vec::Vec; // PathBuf not available in no_std
-use alloc::sync::Arc; // Mutex not available in no_std
-// use std::time removed - not available in no_std
+use std::collections::VecDeque;
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
+use std::time::{SystemTime, UNIX_EPOCH};
 use crate::error::{LifecycleError, Result};
 
 /// Log level for lifecycle events.
@@ -441,11 +441,7 @@ impl Default for LifecycleLogger {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::sync::Arc;
-use alloc::vec::Vec;
+use std::sync::Arc;
 
     #[test]
     fn test_log_level_ordering() {

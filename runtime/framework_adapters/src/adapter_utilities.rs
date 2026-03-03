@@ -8,7 +8,7 @@
 //! Sec 5.2: Common Adapter Utilities
 //! Sec 4.2: Shared Translation Infrastructure
 
-use alloc::{string::{String, ToString}, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::error::AdapterError;
 use crate::AdapterResult;
 
@@ -106,7 +106,7 @@ impl SerializationHelper {
             Ok(())
         } else {
             Err(AdapterError::SerializationError(
-                alloc::format!("Invalid JSON format: {}", trimmed),
+                format!("Invalid JSON format: {}", trimmed),
             ))
         }
     }
@@ -129,10 +129,10 @@ impl SerializationHelper {
 
     /// Extracts a value from a simple key-value JSON object.
     pub fn extract_json_field(json: &str, key: &str) -> AdapterResult<String> {
-        let key_pattern = alloc::format!("\"{}\":", key);
+        let key_pattern = format!("\"{}\":", key);
         json.find(&key_pattern)
             .ok_or_else(|| {
-                AdapterError::SerializationError(alloc::format!("Field not found: {}", key))
+                AdapterError::SerializationError(format!("Field not found: {}", key))
             })
             .and_then(|pos| {
                 let start = pos + key_pattern.len();
@@ -156,7 +156,7 @@ impl SerializationHelper {
                 }
             })
     }
-
+}
 
 /// Validation utilities for adapter configurations and artifacts.
 /// Sec 5.2: Validation Utilities
@@ -167,7 +167,7 @@ impl ValidationHelper {
     pub fn validate_required_fields(config: &[(String, Option<String>)]) -> AdapterResult<()> {
         for (field_name, value) in config {
             if value.is_none() || value.as_ref().map_or(true, |v| v.is_empty()) {
-                return Err(AdapterError::ConfigurationError(alloc::format!(
+                return Err(AdapterError::ConfigurationError(format!(
                     "Required field missing: {}",
                     field_name
                 )));
@@ -182,12 +182,12 @@ impl ValidationHelper {
         const MAX_TIMEOUT_MS: u64 = 3600000; // 1 hour
 
         if timeout_ms < MIN_TIMEOUT_MS {
-            Err(AdapterError::ConfigurationError(alloc::format!(
+            Err(AdapterError::ConfigurationError(format!(
                 "Timeout too short: {} < {}",
                 timeout_ms, MIN_TIMEOUT_MS
             )))
         } else if timeout_ms > MAX_TIMEOUT_MS {
-            Err(AdapterError::ConfigurationError(alloc::format!(
+            Err(AdapterError::ConfigurationError(format!(
                 "Timeout too long: {} > {}",
                 timeout_ms, MAX_TIMEOUT_MS
             )))
@@ -202,12 +202,12 @@ impl ValidationHelper {
         const MAX_TOKENS: u64 = 1_000_000_000; // 1B tokens
 
         if tokens < MIN_TOKENS {
-            Err(AdapterError::ConfigurationError(alloc::format!(
+            Err(AdapterError::ConfigurationError(format!(
                 "Memory capacity too small: {} < {}",
                 tokens, MIN_TOKENS
             )))
         } else if tokens > MAX_TOKENS {
-            Err(AdapterError::ConfigurationError(alloc::format!(
+            Err(AdapterError::ConfigurationError(format!(
                 "Memory capacity too large: {} > {}",
                 tokens, MAX_TOKENS
             )))
@@ -329,7 +329,7 @@ impl ErrorHandlingHelper {
 
     /// Creates a detailed error report.
     pub fn create_error_report(error: &AdapterError) -> String {
-        alloc::format!(
+        format!(
             "AdapterError: {}\nRecoverable: {}\nType: {}",
             error,
             Self::is_recoverable(error),
@@ -348,6 +348,14 @@ impl ErrorHandlingHelper {
                 AdapterError::ConfigurationError(_) => "ConfigurationError",
                 AdapterError::SerializationError(_) => "SerializationError",
                 AdapterError::InvalidReference(_) => "InvalidReference",
+                AdapterError::LockError(_) => "LockError",
+                AdapterError::ValidationError(_) => "ValidationError",
+                AdapterError::StateError(_) => "StateError",
+                AdapterError::SyscallError(_) => "SyscallError",
+                AdapterError::ConfigError(_) => "ConfigError",
+                AdapterError::MemoryError(_) => "MemoryError",
+                AdapterError::RetryExhausted(_) => "RetryExhausted",
+                AdapterError::RetryableError(_) => "RetryableError",
             }
         )
     }
@@ -356,11 +364,6 @@ impl ErrorHandlingHelper {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
 
     #[test]
     fn test_result_aggregator_success() {

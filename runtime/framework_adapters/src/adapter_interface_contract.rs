@@ -14,7 +14,6 @@
 //! Sec 4.2: RuntimeAdapterRef Interface Contract
 //! Sec 5.2: Adapter Interface Contract Specification
 
-use alloc::{string::String, vec::Vec, boxed::Box};
 use crate::framework_type::FrameworkType;
 use crate::AdapterResult;
 use crate::error::AdapterError;
@@ -345,9 +344,6 @@ impl AdapterConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::vec;
 
     #[test]
     fn test_adapter_state_as_str() {

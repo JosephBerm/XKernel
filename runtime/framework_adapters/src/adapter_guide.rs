@@ -42,7 +42,7 @@
 //! Sec 4.2: Universal Adapter Interface
 //! Sec 4.3: Framework Concept Mapping
 
-use alloc::{string::String, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::error::AdapterError;
 use crate::AdapterResult;
 
@@ -199,25 +199,25 @@ pub struct AdapterBestPractices {
 impl Default for AdapterBestPractices {
     fn default() -> Self {
         AdapterBestPractices {
-            do_error_handling: alloc::string::String::from(
+            do_error_handling: String::from(
                 "Always return Result<T, AdapterError> from public methods"
             ),
-            do_input_validation: alloc::string::String::from(
+            do_input_validation: String::from(
                 "Validate framework artifacts against expected schemas at adapter boundaries"
             ),
-            do_use_results: alloc::string::String::from(
+            do_use_results: String::from(
                 "Use Result type for all fallible operations, avoid unwrap() and expect()"
             ),
-            do_track_state: alloc::string::String::from(
+            do_track_state: String::from(
                 "Maintain adapter state transitions through lifecycle methods"
             ),
-            dont_panic_macros: alloc::string::String::from(
+            dont_panic_macros: String::from(
                 "Never use unwrap(), expect(), panic!() - return Err instead"
             ),
-            dont_ignore_errors: alloc::string::String::from(
+            dont_ignore_errors: String::from(
                 "Every Result must be handled - never ignore errors silently"
             ),
-            dont_circular_deps: alloc::string::String::from(
+            dont_circular_deps: String::from(
                 "Avoid circular dependencies between concepts and entities"
             ),
         }
@@ -397,12 +397,7 @@ mod tests {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_adapter_implementation_guide_creation() {

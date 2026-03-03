@@ -13,7 +13,7 @@
 //! Sec 4.2: Dependency DAG Construction
 //! Sec 4.2: Plan Validation
 
-use alloc::{string::String, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::{
     error::AdapterError,
     AdapterResult,
@@ -157,7 +157,7 @@ impl TaskDag {
 
         if visiting.contains_key(&task_id) {
             return Err(AdapterError::TranslationError(
-                alloc::format!("Cyclic dependency detected for task {}", task_id),
+                format!("Cyclic dependency detected for task {}", task_id),
             ));
         }
 
@@ -184,12 +184,12 @@ impl TaskDag {
         for edge in &self.edges {
             if !self.tasks.contains_key(&edge.from_task) {
                 return Err(AdapterError::TranslationError(
-                    alloc::format!("Edge references non-existent source task {}", edge.from_task),
+                    format!("Edge references non-existent source task {}", edge.from_task),
                 ));
             }
             if !self.tasks.contains_key(&edge.to_task) {
                 return Err(AdapterError::TranslationError(
-                    alloc::format!("Edge references non-existent target task {}", edge.to_task),
+                    format!("Edge references non-existent target task {}", edge.to_task),
                 ));
             }
         }
@@ -200,7 +200,7 @@ impl TaskDag {
                 let has_edge = self.edges.iter().any(|e| &e.from_task == dep_id && &e.to_task == task_id);
                 if !has_edge && !self.tasks.contains_key(dep_id) {
                     return Err(AdapterError::TranslationError(
-                        alloc::format!("Task {} depends on non-existent task {}", task_id, dep_id),
+                        format!("Task {} depends on non-existent task {}", task_id, dep_id),
                     ));
                 }
             }
@@ -272,7 +272,7 @@ impl SkPlannerTranslator {
 
         // Create spawn request for each step
         for (idx, step) in steps.iter().enumerate() {
-            let request_id = alloc::format!("sk-spawn-{}", idx);
+            let request_id = format!("sk-spawn-{}", idx);
             let task_id = idx as StepId;
             
             let mut spawn_request = CtSpawnRequest::new(
@@ -334,12 +334,7 @@ impl SkPlannerTranslator {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_planner_step_creation() {

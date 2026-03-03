@@ -6,7 +6,6 @@
 //! Sec 4.2: Error Handling and Recovery
 //! Sec 5.2: Extended Error Types for Week 5
 
-use alloc::string::String;
 use thiserror::Error;
 
 /// Errors that can occur during framework adaptation and translation.
@@ -100,6 +99,38 @@ pub enum AdapterError {
     /// Sec 5.2: Reference Error
     #[error("Invalid adapter reference: {0}")]
     InvalidReference(String),
+
+    /// Lock acquisition failure (e.g., Mutex/RwLock poisoned).
+    #[error("Lock error: {0}")]
+    LockError(String),
+
+    /// Validation error for adapter inputs or configurations.
+    #[error("Validation error: {0}")]
+    ValidationError(String),
+
+    /// State machine transition error.
+    #[error("State error: {0}")]
+    StateError(String),
+
+    /// Syscall invocation failure.
+    #[error("Syscall error: {0}")]
+    SyscallError(String),
+
+    /// Configuration error (short alias).
+    #[error("Config error: {0}")]
+    ConfigError(String),
+
+    /// Memory operation failure.
+    #[error("Memory error: {0}")]
+    MemoryError(String),
+
+    /// Retry attempts exhausted.
+    #[error("Retry exhausted: {0}")]
+    RetryExhausted(String),
+
+    /// Retryable transient error.
+    #[error("Retryable error: {0}")]
+    RetryableError(String),
 }
 
 
@@ -108,7 +139,6 @@ pub type AdapterResult<T> = Result<T, AdapterError>;
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::string::ToString;
 
     #[test]
     fn test_error_display() {

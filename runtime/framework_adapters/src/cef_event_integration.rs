@@ -13,11 +13,11 @@
 
 use crate::error::AdapterError;
 use crate::AdapterResult;
-use alloc::collections::BTreeMap; use alloc::vec::Vec;
-use alloc::sync::Arc; // Mutex not available in no_std
+use std::collections::BTreeMap;
+use std::sync::{Arc, Mutex};
+use std::time::{SystemTime, UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
-use alloc::collections::BTreeMap as HashMap;
-// use std::time removed - not available in no_std
+use std::collections::BTreeMap as HashMap;
 
 /// CEF event header fields
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -433,12 +433,7 @@ impl CefEventFactory {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::sync::Arc;
-use alloc::vec::Vec;
+use std::sync::Arc;
 
     #[test]
     fn test_cef_event_creation() {

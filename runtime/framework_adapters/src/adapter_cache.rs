@@ -10,7 +10,7 @@
 //! Sec 4.2: Adapter Cache Architecture
 //! Sec 5.1: Performance Optimization through Caching
 
-use alloc::{string::String, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::AdapterError;
 
 /// Cached translation entry combining original and translated artifacts.
@@ -217,11 +217,7 @@ pub fn hash_chain(chain_def: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_cached_translation_creation() {

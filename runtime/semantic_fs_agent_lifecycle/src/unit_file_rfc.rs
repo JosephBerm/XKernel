@@ -17,7 +17,6 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management § Unit Files § RFC Specification
 
-use alloc::string::String;
 
 /// Agent Unit File RFC Specification - Abstract
 ///
@@ -556,7 +555,7 @@ pub const DEFAULTS: &[(&str, &str)] = &[
 ///
 /// Reference: Engineering Plan § Agent Lifecycle Management § Unit Files § RFC
 pub fn complete_rfc() -> String {
-    alloc::format!(
+    format!(
         r#"
 COGNITIVE SUBSTRATE AGENT UNIT FILE SPECIFICATION
 RFC 2026-001
@@ -588,12 +587,12 @@ Default Values:
         RFC_BACKWARD_COMPATIBILITY,
         FIELD_DESCRIPTIONS
             .iter()
-            .map(|(field, desc)| alloc::format!("{}: {}", field, desc))
+            .map(|(field, desc)| format!("{}: {}", field, desc))
             .collect::<Vec<_>>()
             .join("\n"),
         DEFAULTS
             .iter()
-            .map(|(field, value)| alloc::format!("{} = {}", field, value))
+            .map(|(field, value)| format!("{} = {}", field, value))
             .collect::<Vec<_>>()
             .join("\n")
     )
@@ -602,8 +601,6 @@ Default Values:
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::vec::Vec;
 
     #[test]
     fn test_rfc_abstract_not_empty() {

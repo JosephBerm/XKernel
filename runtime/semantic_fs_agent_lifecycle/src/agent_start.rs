@@ -11,8 +11,6 @@
 use crate::lifecycle_manager::LifecycleManager;
 use crate::unit_file::AgentUnitFile;
 use crate::{LifecycleError, LifecycleState, Result};
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
 
 /// Parameters for starting an agent.
 ///
@@ -121,14 +119,14 @@ impl AgentStartHandler {
     pub fn validate_unit_file(unit_file: &AgentUnitFile) -> Result<()> {
         // Check agent has a name
         if unit_file.metadata.name.is_empty() {
-            return Err(LifecycleError::LifecycleError(
+            return Err(LifecycleError::GenericError(
                 "Agent name cannot be empty".to_string(),
             ));
         }
 
         // Check agent has a version
         if unit_file.metadata.version.is_empty() {
-            return Err(LifecycleError::LifecycleError(
+            return Err(LifecycleError::GenericError(
                 "Agent version cannot be empty".to_string(),
             ));
         }
@@ -136,7 +134,7 @@ impl AgentStartHandler {
         // Validate memory limits if specified
         if let Some(memory) = unit_file.memory_mb {
             if memory == 0 {
-                return Err(LifecycleError::LifecycleError(
+                return Err(LifecycleError::GenericError(
                     "Memory limit must be greater than 0".to_string(),
                 ));
             }
@@ -145,7 +143,7 @@ impl AgentStartHandler {
         // Validate CPU limits if specified
         if let Some(cpu) = unit_file.cpu_cores {
             if cpu <= 0.0 {
-                return Err(LifecycleError::LifecycleError(
+                return Err(LifecycleError::GenericError(
                     "CPU cores limit must be greater than 0".to_string(),
                 ));
             }
@@ -168,8 +166,8 @@ impl AgentStartHandler {
     /// Extracted configuration as a map for CT spawn translation.
     ///
     /// Reference: Engineering Plan § Agent Lifecycle Manager § Start Operation
-    pub fn extract_config(unit_file: &AgentUnitFile) -> alloc::collections::BTreeMap<String, String> {
-        let mut config = alloc::collections::BTreeMap::new();
+    pub fn extract_config(unit_file: &AgentUnitFile) -> std::collections::BTreeMap<String, String> {
+        let mut config = std::collections::BTreeMap::new();
 
         // Extract metadata
         config.insert("agent_id".to_string(), unit_file.metadata.name.clone());
@@ -194,11 +192,11 @@ impl AgentStartHandler {
         }
 
         // Extract model config if present
-        if let Some(model) = &unit_file.model_config {
-            if let Some(provider) = &model.provider {
+        if unit_file.model_config.has_config() {
+            if let Some(ref provider) = unit_file.model_config.provider {
                 config.insert("model_provider".to_string(), provider.clone());
             }
-            if let Some(model_name) = &model.model_name {
+            if let Some(ref model_name) = unit_file.model_config.model_name {
                 config.insert("model_name".to_string(), model_name.clone());
             }
         }
@@ -222,10 +220,10 @@ impl AgentStartHandler {
     ///
     /// Reference: Engineering Plan § Agent Lifecycle Manager § CT Spawn Integration
     pub fn translate_to_ct_spawn_params(
-        config: &alloc::collections::BTreeMap<String, String>,
+        config: &std::collections::BTreeMap<String, String>,
         unit_file: &AgentUnitFile,
-    ) -> alloc::string::String {
-        let mut params = alloc::string::String::new();
+    ) -> String {
+        let mut params = String::new();
 
         // Add agent identification
         if let Some(agent_id) = config.get("agent_id") {
@@ -281,7 +279,7 @@ impl AgentStartHandler {
     ) -> Result<CtSpawnResult> {
         // Validate agent_id is not empty
         if agent_id.is_empty() {
-            return Err(LifecycleError::LifecycleError(
+            return Err(LifecycleError::GenericError(
                 "Cannot spawn CT with empty agent_id".to_string(),
             ));
         }
@@ -293,7 +291,7 @@ impl AgentStartHandler {
         Ok(CtSpawnResult::new(
             process_id,
             unit_file.memory_mb.map(|mb| mb as u64 * 1024 * 1024),
-            unit_file.cpu_cores,
+            unit_file.cpu_cores.map(|c| c as f32),
         ))
     }
 
@@ -367,10 +365,7 @@ impl AgentStartHandler {
 mod tests {
     use super::*;
     use crate::unit_file::AgentUnitFile;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
+use std::collections::BTreeMap;
 
     fn create_test_unit_file() -> AgentUnitFile {
         AgentUnitFile::new("test-agent", "1.0.0", "Test agent")

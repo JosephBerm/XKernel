@@ -10,9 +10,7 @@
 //! Week 03: TOML schema implementation with model, resources, and health check configuration
 
 use crate::{CrewMembership, DependencySpec, LifecycleConfig};
-use alloc::collections::BTreeMap;
-use alloc::string::String;
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 
 /// Metadata about an agent unit file.
 ///
@@ -475,7 +473,7 @@ impl AgentUnitFile {
 
     /// Gets a string representation suitable for logging/display.
     pub fn identifier(&self) -> String {
-        alloc::format!("{}/{}", self.metadata.name, self.metadata.version)
+        format!("{}/{}", self.metadata.name, self.metadata.version)
     }
 }
 
@@ -488,9 +486,6 @@ impl Default for AgentUnitFile {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::ToString;
-use alloc::vec;
 
     #[test]
     fn test_unit_file_metadata_new() {
@@ -609,7 +604,7 @@ use alloc::vec;
 
     #[test]
     fn test_unit_file_with_multiple_capabilities() {
-        let caps = alloc::vec![
+        let caps = vec![
             "net_admin".to_string(),
             "sys_resource".to_string(),
             "sys_ptrace".to_string(),

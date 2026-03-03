@@ -5,10 +5,10 @@
 //! Identifies requirements for transition from Phase 0 to Phase 1.
 //! See RFC: Week 6 Phase 1 Readiness Assessment design.
 
-use alloc::collections::BTreeMap; // using BTreeMap instead of HashMap
-// use std::time removed - not available in no_std
+use std::collections::BTreeMap;
+use std::time::{SystemTime, UNIX_EPOCH};
 use crate::error::{LifecycleError, Result};
-use alloc::collections::BTreeMap as HashMap;
+use std::collections::BTreeMap as HashMap;
 
 /// Readiness status for a single component.
 ///
@@ -559,11 +559,6 @@ impl Default for Phase1ReadinessAssessment {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
 
     #[test]
     fn test_readiness_status_is_ready() {

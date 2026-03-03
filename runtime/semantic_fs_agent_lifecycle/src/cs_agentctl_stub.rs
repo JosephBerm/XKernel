@@ -5,8 +5,8 @@
 //! list (enumerate managed agents), and help/usage text.
 //! See RFC: Week 6 cs-agentctl CLI subsystem design.
 
-use alloc::collections::BTreeMap;
-// use std::io removed - not available in no_std
+use std::collections::BTreeMap;
+use std::io;
 use crate::error::{LifecycleError, Result};
 use crate::health_status::{HealthStatusAggregator, AgentHealthStatus};
 use crate::lifecycle_logging::{LifecycleLogger, LogLevel, EventType};
@@ -462,11 +462,6 @@ EXAMPLES:
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
 
     #[test]
     fn test_parse_args_help() {

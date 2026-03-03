@@ -10,9 +10,7 @@
 
 use crate::unit_file::AgentUnitFile;
 use crate::{LifecycleError, Result};
-use alloc::collections::BTreeMap;
-use alloc::string::{String, ToString};
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 
 /// Resource quota enforcement policy.
 ///
@@ -119,7 +117,7 @@ impl CtSpawnParams {
     pub fn validate(&self) -> Result<()> {
         // Agent ID must not be empty
         if self.agent_id.is_empty() {
-            return Err(LifecycleError::LifecycleError(
+            return Err(LifecycleError::GenericError(
                 "Agent ID cannot be empty".to_string(),
             ));
         }
@@ -127,7 +125,7 @@ impl CtSpawnParams {
         // Memory limit must be positive if set
         if let Some(mem) = self.memory_limit_bytes {
             if mem == 0 {
-                return Err(LifecycleError::LifecycleError(
+                return Err(LifecycleError::GenericError(
                     "Memory limit must be greater than 0".to_string(),
                 ));
             }
@@ -136,7 +134,7 @@ impl CtSpawnParams {
         // CPU limit must be positive if set
         if let Some(cpu) = self.cpu_cores_limit {
             if cpu <= 0.0 {
-                return Err(LifecycleError::LifecycleError(
+                return Err(LifecycleError::GenericError(
                     "CPU limit must be greater than 0".to_string(),
                 ));
             }
@@ -149,7 +147,7 @@ impl CtSpawnParams {
     ///
     /// Produces a string suitable for passing to kernel CT spawn mechanism.
     pub fn serialize(&self) -> String {
-        let mut result = alloc::string::String::new();
+        let mut result = String::new();
 
         result.push_str("id=");
         result.push_str(&self.agent_id);
@@ -221,7 +219,7 @@ impl CtSpawnTranslator {
 
         if let Some(mem) = memory_mb {
             if mem > MAX_MEMORY_MB && policy == QuotaPolicy::Strict {
-                return Err(LifecycleError::LifecycleError(format!(
+                return Err(LifecycleError::GenericError(format!(
                     "Memory {} MB exceeds system limit {} MB",
                     mem, MAX_MEMORY_MB
                 )));
@@ -230,7 +228,7 @@ impl CtSpawnTranslator {
 
         if let Some(cpu) = cpu_cores {
             if cpu > MAX_CPU_CORES && policy == QuotaPolicy::Strict {
-                return Err(LifecycleError::LifecycleError(format!(
+                return Err(LifecycleError::GenericError(format!(
                     "CPU {} cores exceeds system limit {} cores",
                     cpu, MAX_CPU_CORES
                 )));
@@ -258,7 +256,11 @@ impl CtSpawnTranslator {
     /// Reference: Engineering Plan § Agent Lifecycle Manager § CT Spawn Integration
     pub fn translate(unit_file: &AgentUnitFile, policy: QuotaPolicy) -> Result<CtSpawnParams> {
         // Validate resource quotas first
-        Self::validate_resource_quotas(unit_file.memory_mb, unit_file.cpu_cores, policy)?;
+        Self::validate_resource_quotas(
+            unit_file.memory_mb.map(|m| m as u32),
+            unit_file.cpu_cores.map(|c| c as f32),
+            policy,
+        )?;
 
         let mut params = CtSpawnParams::new(unit_file.metadata.name.clone());
 
@@ -269,7 +271,7 @@ impl CtSpawnTranslator {
 
         // Translate CPU limit
         if let Some(cpu_cores) = unit_file.cpu_cores {
-            params = params.with_cpu_limit(cpu_cores);
+            params = params.with_cpu_limit(cpu_cores as f32);
         }
 
         // Translate capabilities
@@ -363,10 +365,6 @@ impl CtSpawnTranslator {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec;
 
     fn create_test_unit_file() -> AgentUnitFile {
         AgentUnitFile::new("test-agent", "1.0.0", "Test agent")
@@ -531,7 +529,7 @@ use alloc::vec;
 
     #[test]
     fn test_map_tags_to_capabilities_network() {
-        let tags = alloc::vec!["network".to_string()];
+        let tags = vec!["network".to_string()];
         let caps = CtSpawnTranslator::map_tags_to_capabilities(&tags);
 
         assert!(caps.contains(&"net_bind_service".to_string()));
@@ -539,7 +537,7 @@ use alloc::vec;
 
     #[test]
     fn test_map_tags_to_capabilities_privileged() {
-        let tags = alloc::vec!["privileged".to_string()];
+        let tags = vec!["privileged".to_string()];
         let caps = CtSpawnTranslator::map_tags_to_capabilities(&tags);
 
         assert!(caps.contains(&"cap_sys_admin".to_string()));

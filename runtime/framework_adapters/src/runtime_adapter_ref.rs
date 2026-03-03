@@ -10,7 +10,6 @@
 //! Sec 4.2: Framework-Kernel Communication Protocol
 //! Sec 5.1: Translation Fidelity Tracking
 
-use alloc::string::String;
 use crate::framework_type::FrameworkType;
 use crate::AdapterResult;
 

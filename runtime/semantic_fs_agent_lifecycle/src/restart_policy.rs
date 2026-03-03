@@ -7,7 +7,6 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management § Restart Policies
 
-use alloc::string::String;
 use crate::Result;
 
 /// Information about an agent failure for restart decision context.
@@ -51,7 +50,7 @@ pub trait RestartPolicyEngine {
     /// - `failure_info`: Details about the failure
     ///
     /// Returns `Ok(RestartDecision)` if decision can be made, or `Err` if policy cannot decide.
-    fn evaluate(&self, failure_info: &FailureInfo) -> Result<RestartDecision>;
+    fn evaluate(&self, failure_info: &FailureInfo) -> Result<RestartDecisionOutcome>;
 }
 
 /// Restart decision outcome from policy evaluation.
@@ -499,15 +498,15 @@ impl Default for AlwaysRestartPolicy {
 }
 
 impl RestartPolicyEngine for AlwaysRestartPolicy {
-    fn evaluate(&self, failure_info: &FailureInfo) -> Result<RestartDecision> {
+    fn evaluate(&self, failure_info: &FailureInfo) -> Result<RestartDecisionOutcome> {
         let delay_ms = self.backoff.calculate_delay(failure_info.failure_count);
         let should_restart = !self.backoff.is_retry_limit_exceeded(failure_info.failure_count);
 
-        Ok(RestartDecision {
+        Ok(RestartDecisionOutcome {
             should_restart,
             delay_ms,
             reason: if should_restart {
-                alloc::format!("Always restart policy: attempt {}", failure_info.failure_count + 1)
+                format!("Always restart policy: attempt {}", failure_info.failure_count + 1)
             } else {
                 "Restart limit exceeded".to_string()
             },
@@ -548,10 +547,10 @@ impl Default for OnFailureRestartPolicy {
 }
 
 impl RestartPolicyEngine for OnFailureRestartPolicy {
-    fn evaluate(&self, failure_info: &FailureInfo) -> Result<RestartDecision> {
+    fn evaluate(&self, failure_info: &FailureInfo) -> Result<RestartDecisionOutcome> {
         // Only restart if there's been an actual failure (count > 0)
         if failure_info.failure_count == 0 {
-            return Ok(RestartDecision {
+            return Ok(RestartDecisionOutcome {
                 should_restart: false,
                 delay_ms: 0,
                 reason: "Agent exited successfully".to_string(),
@@ -561,11 +560,11 @@ impl RestartPolicyEngine for OnFailureRestartPolicy {
         let delay_ms = self.backoff.calculate_delay(failure_info.failure_count - 1);
         let should_restart = !self.backoff.is_retry_limit_exceeded(failure_info.failure_count - 1);
 
-        Ok(RestartDecision {
+        Ok(RestartDecisionOutcome {
             should_restart,
             delay_ms,
             reason: if should_restart {
-                alloc::format!(
+                format!(
                     "On-failure restart: {} failures, waiting {}ms",
                     failure_info.failure_count, delay_ms
                 )
@@ -599,8 +598,8 @@ impl Default for NeverRestartPolicy {
 }
 
 impl RestartPolicyEngine for NeverRestartPolicy {
-    fn evaluate(&self, _failure_info: &FailureInfo) -> Result<RestartDecision> {
-        Ok(RestartDecision {
+    fn evaluate(&self, _failure_info: &FailureInfo) -> Result<RestartDecisionOutcome> {
+        Ok(RestartDecisionOutcome {
             should_restart: false,
             delay_ms: 0,
             reason: "Never restart policy: manual restart required".to_string(),
@@ -611,8 +610,6 @@ impl RestartPolicyEngine for NeverRestartPolicy {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::ToString;
 
     #[test]
     fn test_restart_policy_always() {

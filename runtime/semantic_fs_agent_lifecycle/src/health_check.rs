@@ -8,9 +8,7 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management § Health Checks
 
-use alloc::collections::VecDeque;
-use alloc::string::String;
-use alloc::vec::Vec;
+use std::collections::VecDeque;
 
 /// Probe type for health endpoint checks.
 ///
@@ -178,14 +176,16 @@ pub struct HealthEndpoint {
 impl HealthEndpoint {
     /// Creates a new HTTP health endpoint.
     pub fn http(address: impl Into<String>, path: impl Into<String>) -> Self {
+        let address_str: String = address.into();
+        let path_str: String = path.into();
         Self {
             endpoint_type: HealthProbeType::HttpGet(format!(
                 "http://{}{}",
-                address.as_ref(),
-                path.as_ref()
+                address_str,
+                path_str
             )),
-            address: address.into(),
-            path: path.into(),
+            address: address_str,
+            path: path_str,
             timeout_ms: 5000,
             interval_ms: 10000,
             failure_threshold: 3,
@@ -769,8 +769,6 @@ impl HealthProbe {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::ToString;
 
     // HealthProbeType tests
     #[test]
@@ -1152,15 +1150,15 @@ use alloc::string::ToString;
     }
 
     #[test]
-    fn test_probe_result_healthy() {
-        let result = ProbeResult::Healthy;
+    fn test_probe_result_healthy_basic() {
+        let result = ProbeResult::Healthy(1000);
         assert!(result.is_healthy());
         assert!(!result.is_unhealthy());
         assert!(!result.is_unknown());
     }
 
     #[test]
-    fn test_probe_result_unhealthy() {
+    fn test_probe_result_unhealthy_basic() {
         let result = ProbeResult::Unhealthy("HTTP 500".to_string());
         assert!(!result.is_healthy());
         assert!(result.is_unhealthy());
@@ -1168,7 +1166,7 @@ use alloc::string::ToString;
     }
 
     #[test]
-    fn test_probe_result_unknown() {
+    fn test_probe_result_unknown_basic() {
         let result = ProbeResult::Unknown;
         assert!(!result.is_healthy());
         assert!(!result.is_unhealthy());

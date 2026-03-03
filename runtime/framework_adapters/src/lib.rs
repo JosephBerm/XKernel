@@ -31,13 +31,8 @@
 //! - Week 4: Advanced SK Adapter Architecture
 //! - Week 5: Framework Adapter Interface Contracts
 
-#![no_std]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
-
-extern crate alloc;
-
-use alloc::{string::String, vec::Vec};
 
 pub mod adapter_base;
 pub mod adapter_impl;
@@ -82,13 +77,13 @@ pub use migration::{AdapterMigrationTool, MigrationResult};
 pub use adapter::IFrameworkAdapter;
 pub use adapter_cache::{AdapterCache, CachedTranslation, CacheStats};
 pub use adapter_guide::{
-    AdapterImplementationGuide, ConceptMapping, MappingFidelityLevel, AdapterBestPractices,
+    AdapterImplementationGuide, AdapterGuideConceptMapping, MappingFidelityLevel, AdapterBestPractices,
     AdapterImplementationTemplate,
 };
 pub use adapter_interface_contract::{
     RuntimeAdapterContract, AdapterState, FrameworkAgentConfig, FrameworkChainDefinition,
     ChainStepDefinition, FrameworkResultItem, AdapterErrorInfo, ErrorRecoveryAction,
-    AdapterBuilder, AdapterConfig,
+    AdapterBuilder, AdapterConfig as ContractAdapterConfig,
 };
 pub use adapter_test_infra::{
     MockKernelIpc, TestAgent, TestChain, AdapterAssertions, AdapterLifecycleTestScenario,
@@ -102,7 +97,7 @@ pub use chain_to_dag::{
     translate_sequential, translate_router, translate_map_reduce, validate_dag,
 };
 pub use common_adapter_pattern::{
-    UniversalFrameworkAdapter, AdapterLifecycleState, AdapterConfig as AdapterConfigLegacy,
+    UniversalFrameworkAdapter, AdapterLifecycleState as CommonAdapterLifecycleState, AdapterConfig as AdapterConfigLegacy,
     LangChainUniversalAdapter, SemanticKernelUniversalAdapter, AutoGenUniversalAdapter,
     CrewAIUniversalAdapter, CustomFrameworkUniversalAdapter,
 };
@@ -110,7 +105,7 @@ pub use entity_lifecycle::{
     EntityLifecycle, CTLifecycleState, AgentLifecycleState, CrewLifecycleState,
     ChannelLifecycleState, CapabilityLifecycleState, MemoryLifecycleState,
 };
-pub use error::{AdapterError, AdapterResult};
+pub use error::{AdapterError as ErrorAdapterError, AdapterResult as ErrorAdapterResult};
 pub use framework_type::FrameworkType;
 pub use ipc_format::{AdapterMessage, KernelResponse, MessageEnvelope, SerializationHint};
 pub use mapping::{ConceptMapping, CsciEntity, FrameworkConcept, MappingMatrix, MappingFidelity};
@@ -120,7 +115,7 @@ pub use memory_translation::{
     translate_memory,
 };
 pub use runtime_adapter_ref::{RuntimeAdapterRef, CTPhase, CTConfig, MemoryConfig, ToolBindingConfig, IpcConfig, TranslationMetrics};
-pub use semantic_kernel::SemanticKernelAdapter;
+pub use semantic_kernel::SemanticKernelAdapter as SemanticKernelFrameworkAdapter;
 pub use sk_adapter::{
     SemanticKernelAdvancedAdapter, SkPlugin, SkFunction, SkPlan, SkPlanStep,
     SkKernelMemory, SkMemoryBufferType, SkContextVariables,
@@ -215,8 +210,6 @@ mod tests {
     #[test]
     fn test_adapter_error_types() {
         use error::AdapterError;
-use alloc::string::String;
-use alloc::string::ToString;
         
         let err1 = AdapterError::TranslationError("test".into());
         let err2 = AdapterError::FrameworkCompatibilityError("test".into());

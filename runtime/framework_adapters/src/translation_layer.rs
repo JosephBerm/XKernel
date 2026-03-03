@@ -12,7 +12,7 @@
 //! Sec 4.2: Framework-to-CSCI Mapping Process
 //! Sec 5.1: Translation Metrics and Fidelity
 
-use alloc::{string::String, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::framework_type::FrameworkType;
 use crate::AdapterError;
 
@@ -236,9 +236,7 @@ pub trait TranslationPipeline {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::string::String;
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_translation_step_as_str() {

@@ -8,7 +8,6 @@
 //!
 //! Sec 5.2: Adapter Testing Infrastructure
 
-use alloc::{string::{String, ToString}, vec::Vec, boxed::Box};
 use crate::error::AdapterError;
 use crate::AdapterResult;
 use crate::adapter_interface_contract::{
@@ -24,7 +23,7 @@ pub struct MockKernelIpc {
     /// Recorded messages sent to kernel
     sent_messages: Vec<String>,
     /// Canned responses to return
-    canned_responses: alloc::collections::BTreeMap<String, String>,
+    canned_responses: std::collections::BTreeMap<String, String>,
     /// Failure mode (None = success, Some(error) = always fail)
     failure_mode: Option<String>,
     /// Latency simulation in milliseconds
@@ -36,7 +35,7 @@ impl MockKernelIpc {
     pub fn new() -> Self {
         MockKernelIpc {
             sent_messages: Vec::new(),
-            canned_responses: alloc::collections::BTreeMap::new(),
+            canned_responses: std::collections::BTreeMap::new(),
             failure_mode: None,
             latency_ms: 0,
         }
@@ -120,7 +119,7 @@ impl TestAgent {
     /// Creates a simple test agent.
     pub fn simple(name: &str) -> Self {
         TestAgent {
-            agent_id: alloc::format!("agent-{}", name.to_lowercase()),
+            agent_id: format!("agent-{}", name.to_lowercase()),
             name: name.to_string(),
             tools: Vec::new(),
             memory_capacity: 100000,
@@ -153,7 +152,7 @@ impl TestAgent {
         FrameworkAgentConfig {
             agent_id: self.agent_id.clone(),
             name: self.name.clone(),
-            description: alloc::format!("Test agent: {}", self.name),
+            description: format!("Test agent: {}", self.name),
             system_prompt: "You are a test agent".into(),
             memory_type: "test-memory".into(),
             memory_capacity_tokens: self.memory_capacity,
@@ -180,7 +179,7 @@ impl TestChain {
     /// Creates a simple sequential chain.
     pub fn sequential(steps: u32) -> Self {
         TestChain {
-            chain_id: alloc::format!("chain-seq-{}", steps),
+            chain_id: format!("chain-seq-{}", steps),
             step_count: steps,
             should_succeed: true,
         }
@@ -189,7 +188,7 @@ impl TestChain {
     /// Creates a failing chain.
     pub fn failing(steps: u32) -> Self {
         TestChain {
-            chain_id: alloc::format!("chain-fail-{}", steps),
+            chain_id: format!("chain-fail-{}", steps),
             step_count: steps,
             should_succeed: false,
         }
@@ -200,14 +199,14 @@ impl TestChain {
         let mut steps = Vec::new();
         for i in 0..self.step_count {
             steps.push(ChainStepDefinition {
-                step_id: alloc::format!("step-{}", i),
-                name: alloc::format!("Step {}", i),
+                step_id: format!("step-{}", i),
+                name: format!("Step {}", i),
                 action: "execute".into(),
                 input_schema: "{}".into(),
                 output_schema: "{}".into(),
                 timeout_ms: 5000,
                 depends_on: if i > 0 {
-                    vec![alloc::format!("step-{}", i - 1)]
+                    vec![format!("step-{}", i - 1)]
                 } else {
                     vec![]
                 },
@@ -242,7 +241,7 @@ impl AdapterAssertions {
     }
 
     /// Asserts result is successful.
-    pub fn assert_success<T>(result: &AdapterResult<T>, context: &str) {
+    pub fn assert_success<T: std::fmt::Debug>(result: &AdapterResult<T>, context: &str) {
         if result.is_err() {
             panic!("Expected success but got error ({}): {:?}", context, result);
         }
@@ -390,12 +389,7 @@ impl AdapterLifecycleTestScenario {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_mock_kernel_ipc_send_message() {

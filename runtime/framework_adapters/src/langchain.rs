@@ -9,7 +9,6 @@
 //! - Agent → Agent (Full fidelity)
 //! - AgentExecutor → AgentCrew (Partial fidelity, coordinator role)
 
-use alloc::string::String;
 use crate::adapter::{
     CognitiveTaskConfig, IFrameworkAdapter, SemanticChannelConfig, SemanticMemoryConfig,
     ToolBindingConfig, TranslationResult,
@@ -43,7 +42,7 @@ impl LangChainAdapter {
     fn map_chain(&self, chain_def: &str) -> AdapterResult<CognitiveTaskConfig> {
         // Parse chain definition (simplified for demonstration)
         // In production, this would deserialize from JSON/YAML and validate schema
-        let task_id = alloc::format!("lc-chain-{}", ulid::Ulid::new());
+        let task_id = format!("lc-chain-{}", ulid::Ulid::new());
 
         Ok(CognitiveTaskConfig {
             task_id,
@@ -57,7 +56,7 @@ impl LangChainAdapter {
     /// Maps a LangChain tool to ToolBinding.
     /// Sec 4.3: Tool Mapping
     fn map_tool_binding(&self, tool_def: &str) -> AdapterResult<ToolBindingConfig> {
-        let tool_id = alloc::format!("lc-tool-{}", ulid::Ulid::new());
+        let tool_id = format!("lc-tool-{}", ulid::Ulid::new());
 
         Ok(ToolBindingConfig {
             tool_id,
@@ -72,7 +71,7 @@ impl LangChainAdapter {
     /// Maps LangChain memory to SemanticMemory.
     /// Sec 4.3: Memory Mapping (Partial Fidelity)
     fn map_memory_impl(&self, memory_def: &str) -> AdapterResult<SemanticMemoryConfig> {
-        let memory_id = alloc::format!("lc-mem-{}", ulid::Ulid::new());
+        let memory_id = format!("lc-mem-{}", ulid::Ulid::new());
 
         Ok(SemanticMemoryConfig {
             memory_id,
@@ -134,7 +133,7 @@ impl IFrameworkAdapter for LangChainAdapter {
             ));
         }
 
-        let channel_id = alloc::format!("lc-ch-{}", ulid::Ulid::new());
+        let channel_id = format!("lc-ch-{}", ulid::Ulid::new());
         Ok(SemanticChannelConfig {
             channel_id,
             name: "LangChainChannel".to_string(),
@@ -162,8 +161,6 @@ impl IFrameworkAdapter for LangChainAdapter {
 mod tests {
     use super::*;
 use ulid::Ulid;
-use alloc::format;
-use alloc::string::ToString;
 
     #[test]
     fn test_langchain_adapter_creation() {

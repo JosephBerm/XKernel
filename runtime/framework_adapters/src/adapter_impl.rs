@@ -6,8 +6,6 @@
 //! CrewAI, AutoGen, and custom framework adapters.
 
 use crate::adapter_base::{AdapterConfig, AdapterLifecycleState, AdapterResult, FrameworkAdapter, AgentHandle};
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// LangChain-specific adapter implementation
 pub struct LangChainAdapter {

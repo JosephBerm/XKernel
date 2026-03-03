@@ -10,7 +10,6 @@
 //! Sec 4.3: Framework Memory Mapping
 //! Sec 5.4: Memory Migration Heuristics
 
-use alloc::string::String;
 use crate::framework_type::FrameworkType;
 
 /// Framework-agnostic memory type classifications
@@ -399,7 +398,7 @@ pub struct MemoryMappingRegistry;
 impl MemoryMappingRegistry {
     /// Gets all tier mappings for a specific framework
     /// Sec 4.3: Framework-Specific Mapping Lookup
-    pub fn get_mappings(framework: FrameworkType) -> alloc::vec::Vec<TierMapping> {
+    pub fn get_mappings(framework: FrameworkType) -> Vec<TierMapping> {
         match framework {
             FrameworkType::LangChain => LangChainMemoryMapping::mappings().to_vec(),
             FrameworkType::SemanticKernel => SemanticKernelMemoryMapping::mappings().to_vec(),
@@ -434,7 +433,6 @@ impl MemoryMappingRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::vec::Vec;
 
     #[test]
     fn test_framework_memory_type_as_str() {

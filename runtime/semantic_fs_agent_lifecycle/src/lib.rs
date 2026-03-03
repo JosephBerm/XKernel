@@ -7,10 +7,9 @@
 //! lifecycle configuration, health checks, restart policies, dependency ordering, and
 //! agent unit file specifications.
 //!
-//! ## No-std Environment
+//! ## Runtime Environment
 //!
-//! This crate is `#![no_std]` for use in kernel contexts. All heap allocations use
-//! `alloc` crate collections.
+//! This is an L2 runtime crate with access to the standard library.
 //!
 //! ## Design Principles
 //!
@@ -20,11 +19,8 @@
 //! - **Dependency Resolution**: Graph-based dependency ordering with cycle detection
 //! - **Kubernetes Patterns**: Restart policies and backoff strategies align with K8s
 
-#![no_std]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
-
-extern crate alloc;
 
 pub mod semantic_fs;
 pub mod agent_lifecycle;
@@ -81,7 +77,7 @@ pub use error::{LifecycleError, Result};
 pub use semantic_fs::{QueryEngine, TagSystem, PathResolver, MountManager};
 
 // Core exports from agent_lifecycle module
-pub use agent_lifecycle::{AgentUnit, AgentState, HealthProbe, RestartPolicy, StateMachine};
+pub use agent_lifecycle::{AgentUnit, AgentState, HealthProbe as AgentHealthProbe, RestartPolicy as AgentRestartPolicy, StateMachine};
 
 // Core exports from mounts module
 pub use mounts::{MountProvider, LocalMount, HttpMount, S3Mount, DatabaseMount, CustomPluginMount};
@@ -94,6 +90,7 @@ pub use health_check::{
     AgentHealthStatus, HealthCheckConfig, HealthCheckType, HealthEndpoint, HealthHistory,
     HealthProbe, HealthProbeType, ProbeResult, ProbeSchedule,
 };
+
 
 // Core exports from health_status module
 pub use health_status::{
@@ -124,6 +121,7 @@ pub use restart_policy::{
     RestartDecision, RestartDecisionOutcome, RestartHistory, RestartPolicy, RestartPolicyEngine,
 };
 
+
 // Core exports from synthesis module
 pub use synthesis::{
     FeatureMapping, FeatureParityMatrix, GapAnalysis, MappingType, UnitFileRequirements,
@@ -135,7 +133,7 @@ pub use unit_file::{AgentUnitFile, ModelConfig, ResourceLimits, UnitFileMetadata
 // Core exports from unit_file_schema module
 pub use unit_file_schema::{
     AgentFramework, AgentSection, AgentUnitFileSchema, CapabilitiesSection, CrewSection,
-    DependenciesSection, HealthCheckSection, HealthCheckType, ModelSection, ResourcesSection,
+    DependenciesSection, HealthCheckSection, UnitFileHealthCheckType as SchemaHealthCheckType, ModelSection, ResourcesSection,
     RestartPolicyType, RestartSection, UnitFileError, UnitFileResult,
 };
 

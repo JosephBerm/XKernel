@@ -12,7 +12,6 @@
 //! - Role → Agent (Full fidelity)
 //! - Tool → ToolBinding (Full fidelity)
 
-use alloc::string::String;
 use crate::adapter::{
     CognitiveTaskConfig, IFrameworkAdapter, SemanticChannelConfig, SemanticMemoryConfig,
     ToolBindingConfig, TranslationResult,
@@ -44,7 +43,7 @@ impl CrewAIAdapter {
     /// Maps a CrewAI task to CognitiveTask.
     /// Sec 4.3: Task Mapping (Full Fidelity)
     fn map_task(&self, task_def: &str) -> AdapterResult<CognitiveTaskConfig> {
-        let task_id = alloc::format!("crew-task-{}", ulid::Ulid::new());
+        let task_id = format!("crew-task-{}", ulid::Ulid::new());
 
         Ok(CognitiveTaskConfig {
             task_id,
@@ -58,7 +57,7 @@ impl CrewAIAdapter {
     /// Maps a CrewAI tool to ToolBinding.
     /// Sec 4.3: Tool Mapping (Full Fidelity)
     fn map_tool_binding(&self, tool_def: &str) -> AdapterResult<ToolBindingConfig> {
-        let tool_id = alloc::format!("crew-tool-{}", ulid::Ulid::new());
+        let tool_id = format!("crew-tool-{}", ulid::Ulid::new());
 
         Ok(ToolBindingConfig {
             tool_id,
@@ -73,7 +72,7 @@ impl CrewAIAdapter {
     /// Maps CrewAI memory to SemanticMemory.
     /// Sec 4.3: Memory Mapping
     fn map_crew_memory(&self, memory_def: &str) -> AdapterResult<SemanticMemoryConfig> {
-        let memory_id = alloc::format!("crew-mem-{}", ulid::Ulid::new());
+        let memory_id = format!("crew-mem-{}", ulid::Ulid::new());
 
         Ok(SemanticMemoryConfig {
             memory_id,
@@ -135,7 +134,7 @@ impl IFrameworkAdapter for CrewAIAdapter {
             ));
         }
 
-        let channel_id = alloc::format!("crew-ch-{}", ulid::Ulid::new());
+        let channel_id = format!("crew-ch-{}", ulid::Ulid::new());
         Ok(SemanticChannelConfig {
             channel_id,
             name: "CrewAIChannel".to_string(),
@@ -163,8 +162,6 @@ impl IFrameworkAdapter for CrewAIAdapter {
 mod tests {
     use super::*;
 use ulid::Ulid;
-use alloc::format;
-use alloc::string::ToString;
 
     #[test]
     fn test_crewai_adapter_creation() {

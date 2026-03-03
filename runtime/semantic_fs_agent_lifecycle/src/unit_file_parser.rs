@@ -28,13 +28,9 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management § Unit Files § Parser
 
+use std::collections::BTreeMap;
+
 use crate::{
-use alloc::collections::BTreeMap;
-
-use alloc::string::{String, ToString};
-
-use alloc::vec::Vec;
-
     AgentUnitFile, CrewMembership, DependencySpec, HealthCheckConfig, HealthCheckType,
     HealthProbeType, LifecycleConfig, ModelConfig, ProbeSchedule, ResourceLimits, Result,
     UnitFileMetadata,
@@ -95,14 +91,14 @@ impl ParseError {
         let mut msg = self.message.clone();
 
         if let Some(line) = self.line {
-            msg = alloc::format!("{}:{}", line, msg);
+            msg = format!("{}:{}", line, msg);
             if let Some(col) = self.column {
-                msg = alloc::format!("{}:{}", msg, col);
+                msg = format!("{}:{}", msg, col);
             }
         }
 
         if let Some(ctx) = &self.context {
-            msg = alloc::format!("{}\nContext: {}", msg, ctx);
+            msg = format!("{}\nContext: {}", msg, ctx);
         }
 
         msg
@@ -277,36 +273,26 @@ impl UnitFileParser {
         let success_threshold =
             self.extract_optional_u32_field(toml_str, "success_threshold", "[health_check]");
 
-        let probe_type = if let Some(ref ct) = check_type {
+        let endpoint_str = endpoint.clone().unwrap_or_default();
+
+        let check_type_enum = if let Some(ref ct) = check_type {
             match ct.to_lowercase().as_str() {
-                "http" => HealthProbeType::Http,
-                "tcp" => HealthProbeType::Tcp,
-                "exec" => HealthProbeType::Exec,
-                "csci" => HealthProbeType::Csci,
-                _ => HealthProbeType::Http,
+                "http" => HealthCheckType::Http(endpoint_str),
+                "tcp" => HealthCheckType::Tcp(endpoint_str.parse::<u16>().unwrap_or(8080)),
+                "exec" => HealthCheckType::Exec(endpoint_str),
+                "csci" => HealthCheckType::CsciSyscall(endpoint_str),
+                _ => HealthCheckType::Http(endpoint_str),
             }
         } else {
-            HealthProbeType::Http
+            HealthCheckType::Http(endpoint_str)
         };
 
-        let probe = crate::HealthProbe {
-            probe_type,
-            endpoint: endpoint.map(crate::HealthEndpoint::from_str).transpose()?,
-        };
-
-        let schedule = ProbeSchedule {
-            initial_delay_ms: 0,
+        Ok(HealthCheckConfig {
+            check_type: check_type_enum,
             interval_ms: interval_ms.unwrap_or(10000),
             timeout_ms: timeout_ms.unwrap_or(5000),
             failure_threshold: failure_threshold.unwrap_or(3),
             success_threshold: success_threshold.unwrap_or(1),
-        };
-
-        Ok(HealthCheckConfig {
-            readiness: Some(probe.clone()),
-            liveness: Some(probe),
-            readiness_schedule: Some(schedule.clone()),
-            liveness_schedule: Some(schedule),
         })
     }
 
@@ -323,25 +309,21 @@ impl UnitFileParser {
         let backoff_multiplier = self.extract_optional_f32_field(toml_str, "backoff_multiplier", "[restart]").unwrap_or(2.0);
 
         let backoff_config = crate::BackoffConfig {
-            base_ms: backoff_base_ms,
-            multiplier: backoff_multiplier,
-            max_ms: self.extract_optional_u64_field(toml_str, "max_backoff_ms", "[restart]").unwrap_or(30000),
+            initial_delay_ms: backoff_base_ms,
+            max_delay_ms: self.extract_optional_u64_field(toml_str, "max_backoff_ms", "[restart]").unwrap_or(30000),
+            multiplier: backoff_multiplier as f64,
+            max_retries,
         };
 
-        let restart_policy = crate::RestartPolicy::OnFailure(crate::OnFailureRestartPolicy {
-            max_retries,
-            backoff: backoff_config,
-        });
+        let restart_policy = crate::RestartPolicy::OnFailure;
 
         Ok(LifecycleConfig {
             startup_timeout_ms,
             shutdown_timeout_ms,
-            readiness_probe: health_check_config.as_ref().and_then(|hc| hc.readiness.clone()),
-            liveness_probe: health_check_config.as_ref().and_then(|hc| hc.liveness.clone()),
-            readiness_schedule: health_check_config.as_ref().and_then(|hc| hc.readiness_schedule.clone()),
-            liveness_schedule: health_check_config.as_ref().and_then(|hc| hc.liveness_schedule.clone()),
+            health_check: None,
+            readiness_probe: None,
+            liveness_probe: None,
             restart_policy,
-            restart_history: crate::RestartHistory::new(),
         })
     }
 
@@ -428,8 +410,8 @@ impl UnitFileParser {
 
     /// Extracts a required string field from a section.
     fn extract_string_field(&self, toml_str: &str, field: &str, section: &str) -> ParseResult<String> {
-        let pattern = alloc::format!("{} = \"", field);
-        let prefix = alloc::format!("{}\"", field);
+        let pattern = format!("{} = \"", field);
+        let prefix = format!("{}\"", field);
 
         if let Some(pos) = toml_str.find(&pattern) {
             let start = pos + pattern.len();
@@ -439,7 +421,7 @@ impl UnitFileParser {
             }
         }
 
-        Err(ParseError::new(alloc::format!(
+        Err(ParseError::new(format!(
             "Missing required field '{}' in {} section",
             field, section
         )))
@@ -447,7 +429,7 @@ impl UnitFileParser {
 
     /// Extracts an optional string field from a section.
     fn extract_optional_string_field(&self, toml_str: &str, field: &str, _section: &str) -> Option<String> {
-        let pattern = alloc::format!("{} = \"", field);
+        let pattern = format!("{} = \"", field);
 
         if let Some(pos) = toml_str.find(&pattern) {
             let start = pos + pattern.len();
@@ -462,7 +444,7 @@ impl UnitFileParser {
 
     /// Extracts an optional u32 field.
     fn extract_optional_u32_field(&self, toml_str: &str, field: &str, _section: &str) -> Option<u32> {
-        let pattern = alloc::format!("{} = ", field);
+        let pattern = format!("{} = ", field);
 
         if let Some(pos) = toml_str.find(&pattern) {
             let start = pos + pattern.len();
@@ -478,7 +460,7 @@ impl UnitFileParser {
 
     /// Extracts an optional u64 field.
     fn extract_optional_u64_field(&self, toml_str: &str, field: &str, _section: &str) -> Option<u64> {
-        let pattern = alloc::format!("{} = ", field);
+        let pattern = format!("{} = ", field);
 
         if let Some(pos) = toml_str.find(&pattern) {
             let start = pos + pattern.len();
@@ -494,7 +476,7 @@ impl UnitFileParser {
 
     /// Extracts an optional f32 field.
     fn extract_optional_f32_field(&self, toml_str: &str, field: &str, _section: &str) -> Option<f32> {
-        let pattern = alloc::format!("{} = ", field);
+        let pattern = format!("{} = ", field);
 
         if let Some(pos) = toml_str.find(&pattern) {
             let start = pos + pattern.len();
@@ -512,7 +494,7 @@ impl UnitFileParser {
 
     /// Extracts an optional f64 field.
     fn extract_optional_f64_field(&self, toml_str: &str, field: &str, _section: &str) -> Option<f64> {
-        let pattern = alloc::format!("{} = ", field);
+        let pattern = format!("{} = ", field);
 
         if let Some(pos) = toml_str.find(&pattern) {
             let start = pos + pattern.len();
@@ -530,7 +512,7 @@ impl UnitFileParser {
 
     /// Extracts a string array field.
     fn extract_string_array(&self, toml_str: &str, field: &str, _section: &str) -> Option<Vec<String>> {
-        let pattern = alloc::format!("{} = [", field);
+        let pattern = format!("{} = [", field);
 
         if let Some(pos) = toml_str.find(&pattern) {
             let start = pos + pattern.len();
@@ -587,9 +569,6 @@ impl Default for UnitFileParser {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
 
     #[test]
     fn test_parse_simple_agent() {

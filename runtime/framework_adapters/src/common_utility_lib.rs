@@ -12,10 +12,10 @@
 
 use crate::error::AdapterError;
 use crate::AdapterResult;
-use alloc::collections::BTreeMap; use alloc::vec::Vec;
-use alloc::sync::Arc; // Mutex not available in no_std
+use std::collections::BTreeMap;
+use std::sync::{Arc, Mutex};
 use serde::{Deserialize, Serialize};
-use alloc::collections::BTreeMap as HashMap;
+use std::collections::BTreeMap as HashMap;
 
 /// Chain-to-DAG translator for converting sequential execution chains
 /// Per Week 6, Section 2: "chain_to_dag_translator module"
@@ -426,13 +426,7 @@ impl EventEmitter {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::sync::Arc;
-use alloc::vec::Vec;
-use alloc::vec;
+use std::sync::Arc;
 
     #[test]
     fn test_chain_to_dag_translator() -> AdapterResult<()> {

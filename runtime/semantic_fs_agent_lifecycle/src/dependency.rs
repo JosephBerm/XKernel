@@ -7,9 +7,7 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management § Dependencies
 
-use alloc::collections::{BTreeMap, BTreeSet};
-use alloc::string::String;
-use alloc::vec::Vec;
+use std::collections::{BTreeMap, BTreeSet};
 use crate::{LifecycleError, Result};
 
 /// State of a dependency in the dependency graph.
@@ -553,9 +551,7 @@ impl CrewMembership {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::string::ToString;
-use alloc::vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_ordering_constraint_before() {
@@ -575,7 +571,7 @@ use alloc::vec;
 
     #[test]
     fn test_ordering_constraint_concurrent() {
-        let agents = alloc::vec!["a".to_string(), "b".to_string()];
+        let agents = vec!["a".to_string(), "b".to_string()];
         let constraint = OrderingConstraint::Concurrent(agents);
         assert!(!constraint.is_before());
         assert!(!constraint.is_after());
@@ -617,39 +613,39 @@ use alloc::vec;
     #[test]
     fn test_dependency_graph_add_agent() {
         let mut graph = DependencyGraph::new();
-        graph.add_agent("app".to_string(), alloc::vec!["db".to_string()]);
+        graph.add_agent("app".to_string(), vec!["db".to_string()]);
         assert!(graph.contains_agent(&"app".to_string()));
     }
 
     #[test]
     fn test_dependency_graph_no_cycle() {
         let mut graph = DependencyGraph::new();
-        graph.add_agent("app".to_string(), alloc::vec!["db".to_string()]);
-        graph.add_agent("db".to_string(), alloc::vec![]);
+        graph.add_agent("app".to_string(), vec!["db".to_string()]);
+        graph.add_agent("db".to_string(), vec![]);
         assert!(graph.detect_cycle().is_ok());
     }
 
     #[test]
     fn test_dependency_graph_simple_cycle() {
         let mut graph = DependencyGraph::new();
-        graph.add_agent("a".to_string(), alloc::vec!["b".to_string()]);
-        graph.add_agent("b".to_string(), alloc::vec!["a".to_string()]);
+        graph.add_agent("a".to_string(), vec!["b".to_string()]);
+        graph.add_agent("b".to_string(), vec!["a".to_string()]);
         assert!(graph.detect_cycle().is_err());
     }
 
     #[test]
     fn test_dependency_graph_self_cycle() {
         let mut graph = DependencyGraph::new();
-        graph.add_agent("a".to_string(), alloc::vec!["a".to_string()]);
+        graph.add_agent("a".to_string(), vec!["a".to_string()]);
         assert!(graph.detect_cycle().is_err());
     }
 
     #[test]
     fn test_dependency_graph_topological_sort() {
         let mut graph = DependencyGraph::new();
-        graph.add_agent("app".to_string(), alloc::vec!["db".to_string()]);
-        graph.add_agent("db".to_string(), alloc::vec![]);
-        graph.add_agent("cache".to_string(), alloc::vec!["db".to_string()]);
+        graph.add_agent("app".to_string(), vec!["db".to_string()]);
+        graph.add_agent("db".to_string(), vec![]);
+        graph.add_agent("cache".to_string(), vec!["db".to_string()]);
 
         let result = graph.topological_sort().expect("should succeed");
         let db_idx = result.iter().position(|a| a == "db").unwrap();
@@ -663,8 +659,8 @@ use alloc::vec;
     #[test]
     fn test_dependency_graph_topological_sort_with_cycle() {
         let mut graph = DependencyGraph::new();
-        graph.add_agent("a".to_string(), alloc::vec!["b".to_string()]);
-        graph.add_agent("b".to_string(), alloc::vec!["a".to_string()]);
+        graph.add_agent("a".to_string(), vec!["b".to_string()]);
+        graph.add_agent("b".to_string(), vec!["a".to_string()]);
         assert!(graph.topological_sort().is_err());
     }
 
@@ -731,15 +727,15 @@ use alloc::vec;
     #[test]
     fn test_parallel_start_groups_add_group() {
         let mut groups = ParallelStartGroups::new();
-        groups.add_group(alloc::vec!["agent1".to_string(), "agent2".to_string()]);
+        groups.add_group(vec!["agent1".to_string(), "agent2".to_string()]);
         assert_eq!(groups.group_count(), 1);
     }
 
     #[test]
     fn test_parallel_start_groups_all_agents() {
         let mut groups = ParallelStartGroups::new();
-        groups.add_group(alloc::vec!["a".to_string(), "b".to_string()]);
-        groups.add_group(alloc::vec!["c".to_string()]);
+        groups.add_group(vec!["a".to_string(), "b".to_string()]);
+        groups.add_group(vec!["c".to_string()]);
 
         let all = groups.all_agents();
         assert_eq!(all.len(), 3);
@@ -752,9 +748,9 @@ use alloc::vec;
     fn test_parallel_start_groups_from_linear_dependency() {
         let mut graph = DependencyGraph::new();
         // Linear chain: db <- cache <- app
-        graph.add_agent("db".to_string(), alloc::vec![]);
-        graph.add_agent("cache".to_string(), alloc::vec!["db".to_string()]);
-        graph.add_agent("app".to_string(), alloc::vec!["cache".to_string()]);
+        graph.add_agent("db".to_string(), vec![]);
+        graph.add_agent("cache".to_string(), vec!["db".to_string()]);
+        graph.add_agent("app".to_string(), vec!["cache".to_string()]);
 
         let groups = ParallelStartGroups::from_dependency_graph(&graph)
             .expect("should compute groups");
@@ -770,9 +766,9 @@ use alloc::vec;
     fn test_parallel_start_groups_from_parallel_dependencies() {
         let mut graph = DependencyGraph::new();
         // Both cache and worker depend on db; cache and worker can start in parallel
-        graph.add_agent("db".to_string(), alloc::vec![]);
-        graph.add_agent("cache".to_string(), alloc::vec!["db".to_string()]);
-        graph.add_agent("worker".to_string(), alloc::vec!["db".to_string()]);
+        graph.add_agent("db".to_string(), vec![]);
+        graph.add_agent("cache".to_string(), vec!["db".to_string()]);
+        graph.add_agent("worker".to_string(), vec!["db".to_string()]);
 
         let groups = ParallelStartGroups::from_dependency_graph(&graph)
             .expect("should compute groups");
@@ -789,10 +785,10 @@ use alloc::vec;
     fn test_parallel_start_groups_from_complex_dependency() {
         let mut graph = DependencyGraph::new();
         // Complex: db -> {cache, queue}, app depends on both cache and queue
-        graph.add_agent("db".to_string(), alloc::vec![]);
-        graph.add_agent("cache".to_string(), alloc::vec!["db".to_string()]);
-        graph.add_agent("queue".to_string(), alloc::vec!["db".to_string()]);
-        graph.add_agent("app".to_string(), alloc::vec!["cache".to_string(), "queue".to_string()]);
+        graph.add_agent("db".to_string(), vec![]);
+        graph.add_agent("cache".to_string(), vec!["db".to_string()]);
+        graph.add_agent("queue".to_string(), vec!["db".to_string()]);
+        graph.add_agent("app".to_string(), vec!["cache".to_string(), "queue".to_string()]);
 
         let groups = ParallelStartGroups::from_dependency_graph(&graph)
             .expect("should compute groups");
@@ -808,8 +804,8 @@ use alloc::vec;
     #[test]
     fn test_parallel_start_groups_detects_cycles() {
         let mut graph = DependencyGraph::new();
-        graph.add_agent("a".to_string(), alloc::vec!["b".to_string()]);
-        graph.add_agent("b".to_string(), alloc::vec!["a".to_string()]);
+        graph.add_agent("a".to_string(), vec!["b".to_string()]);
+        graph.add_agent("b".to_string(), vec!["a".to_string()]);
 
         let result = ParallelStartGroups::from_dependency_graph(&graph);
         assert!(result.is_err());
@@ -826,7 +822,7 @@ use alloc::vec;
     #[test]
     fn test_crew_dependency_context_add_agent() {
         let mut context = CrewDependencyContext::new("crew1");
-        context.add_agent("app".to_string(), alloc::vec!["db".to_string()]);
+        context.add_agent("app".to_string(), vec!["db".to_string()]);
 
         assert!(context.dependency_graph.contains_agent(&"app".to_string()));
         assert_eq!(
@@ -838,7 +834,7 @@ use alloc::vec;
     #[test]
     fn test_crew_dependency_context_set_dependency_state() {
         let mut context = CrewDependencyContext::new("crew1");
-        context.add_agent("db".to_string(), alloc::vec![]);
+        context.add_agent("db".to_string(), vec![]);
         context.set_dependency_state(&"db".to_string(), DependencyState::Ready);
 
         assert_eq!(
@@ -850,8 +846,8 @@ use alloc::vec;
     #[test]
     fn test_crew_dependency_context_dependencies_ready() {
         let mut context = CrewDependencyContext::new("crew1");
-        context.add_agent("db".to_string(), alloc::vec![]);
-        context.add_agent("app".to_string(), alloc::vec!["db".to_string()]);
+        context.add_agent("db".to_string(), vec![]);
+        context.add_agent("app".to_string(), vec!["db".to_string()]);
 
         // db not ready yet
         assert!(!context.dependencies_ready(&"app".to_string()));
@@ -864,9 +860,9 @@ use alloc::vec;
     #[test]
     fn test_crew_dependency_context_compute_startup_order() {
         let mut context = CrewDependencyContext::new("crew1");
-        context.add_agent("db".to_string(), alloc::vec![]);
-        context.add_agent("cache".to_string(), alloc::vec!["db".to_string()]);
-        context.add_agent("app".to_string(), alloc::vec!["cache".to_string()]);
+        context.add_agent("db".to_string(), vec![]);
+        context.add_agent("cache".to_string(), vec!["db".to_string()]);
+        context.add_agent("app".to_string(), vec!["cache".to_string()]);
 
         let order = context
             .compute_startup_order()
@@ -883,9 +879,9 @@ use alloc::vec;
     #[test]
     fn test_crew_dependency_context_compute_parallel_groups() {
         let mut context = CrewDependencyContext::new("crew1");
-        context.add_agent("db".to_string(), alloc::vec![]);
-        context.add_agent("cache".to_string(), alloc::vec!["db".to_string()]);
-        context.add_agent("worker".to_string(), alloc::vec!["db".to_string()]);
+        context.add_agent("db".to_string(), vec![]);
+        context.add_agent("cache".to_string(), vec!["db".to_string()]);
+        context.add_agent("worker".to_string(), vec!["db".to_string()]);
 
         let groups = context
             .compute_parallel_groups()
@@ -897,7 +893,7 @@ use alloc::vec;
     #[test]
     fn test_crew_dependency_context_no_dependencies() {
         let mut context = CrewDependencyContext::new("crew1");
-        context.add_agent("standalone".to_string(), alloc::vec![]);
+        context.add_agent("standalone".to_string(), vec![]);
 
         assert!(context.dependencies_ready(&"standalone".to_string()));
     }
@@ -905,9 +901,9 @@ use alloc::vec;
     #[test]
     fn test_crew_dependency_context_multiple_dependencies() {
         let mut context = CrewDependencyContext::new("crew1");
-        context.add_agent("db".to_string(), alloc::vec![]);
-        context.add_agent("cache".to_string(), alloc::vec![]);
-        context.add_agent("app".to_string(), alloc::vec!["db".to_string(), "cache".to_string()]);
+        context.add_agent("db".to_string(), vec![]);
+        context.add_agent("cache".to_string(), vec![]);
+        context.add_agent("app".to_string(), vec!["db".to_string(), "cache".to_string()]);
 
         // Neither ready
         assert!(!context.dependencies_ready(&"app".to_string()));

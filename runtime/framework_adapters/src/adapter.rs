@@ -5,8 +5,6 @@
 //! This module defines the foundational `FrameworkAdapter` trait that all framework adapters
 //! must implement, along with core types for adapter lifecycle, configuration, and event translation.
 
-use alloc::string::String;
-use alloc::vec::Vec;
 
 /// Core performance target: P95 latency for adapter operations (milliseconds)
 pub const P95_LATENCY_TARGET_MS: u32 = 500;
@@ -82,43 +80,8 @@ impl AdapterConfig {
     }
 }
 
-/// Result type for adapter operations
-pub type AdapterResult<T> = core::result::Result<T, AdapterError>;
-
-/// Error types for adapter operations
-#[derive(Debug, Clone)]
-pub enum AdapterError {
-    /// Translation between frameworks failed
-    TranslationError(String),
-    /// Framework compatibility issue
-    FrameworkCompatibility(String),
-    /// IPC communication error
-    IpcError(String),
-    /// Memory limit exceeded
-    MemoryExceeded,
-    /// Timeout during operation
-    OperationTimeout,
-    /// Agent not found
-    AgentNotFound,
-    /// Configuration error
-    ConfigError(String),
-}
-
-impl core::fmt::Display for AdapterError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            AdapterError::TranslationError(msg) => write!(f, "Translation error: {}", msg),
-            AdapterError::FrameworkCompatibility(msg) => {
-                write!(f, "Framework compatibility error: {}", msg)
-            }
-            AdapterError::IpcError(msg) => write!(f, "IPC error: {}", msg),
-            AdapterError::MemoryExceeded => write!(f, "Memory limit exceeded"),
-            AdapterError::OperationTimeout => write!(f, "Operation timeout"),
-            AdapterError::AgentNotFound => write!(f, "Agent not found"),
-            AdapterError::ConfigError(msg) => write!(f, "Configuration error: {}", msg),
-        }
-    }
-}
+/// Re-export error types from the canonical error module.
+pub use crate::error::{AdapterError, AdapterResult};
 
 /// Main trait for framework adapters
 ///
@@ -144,6 +107,115 @@ pub trait FrameworkAdapter {
 
     /// Check memory usage (returns megabytes used)
     fn memory_used_mb(&self) -> u32;
+}
+
+/// Configuration for a cognitive task translated from a framework concept.
+/// Sec 4.3: Cognitive Task Mapping
+#[derive(Debug, Clone)]
+pub struct CognitiveTaskConfig {
+    /// Unique task identifier
+    pub task_id: String,
+    /// Task name
+    pub name: String,
+    /// Task objective description
+    pub objective: String,
+    /// Timeout in milliseconds
+    pub timeout_ms: u64,
+    /// Whether the task is mandatory
+    pub is_mandatory: bool,
+}
+
+/// Configuration for a semantic channel translated from a framework communication pattern.
+/// Sec 4.3: Channel Mapping
+#[derive(Debug, Clone)]
+pub struct SemanticChannelConfig {
+    /// Unique channel identifier
+    pub channel_id: String,
+    /// Channel name
+    pub name: String,
+    /// Participant description
+    pub participants: String,
+    /// Communication pattern type
+    pub communication_pattern: String,
+    /// Whether the channel is persistent
+    pub is_persistent: bool,
+}
+
+/// Configuration for semantic memory translated from framework memory.
+/// Sec 4.3: Memory Mapping
+#[derive(Debug, Clone)]
+pub struct SemanticMemoryConfig {
+    /// Unique memory identifier
+    pub memory_id: String,
+    /// Memory type classification
+    pub memory_type: String,
+    /// Capacity in tokens
+    pub capacity_tokens: u64,
+    /// Serialization format
+    pub serialization_format: String,
+}
+
+/// Configuration for tool binding translated from a framework tool.
+/// Sec 4.3: Tool Binding Mapping
+#[derive(Debug, Clone)]
+pub struct ToolBindingConfig {
+    /// Unique tool identifier
+    pub tool_id: String,
+    /// Tool name
+    pub name: String,
+    /// Tool description
+    pub description: String,
+    /// Input schema (JSON string)
+    pub input_schema: String,
+    /// Output schema (JSON string)
+    pub output_schema: String,
+    /// Whether authorization is required
+    pub requires_authorization: bool,
+}
+
+/// Result of a framework-to-CSCI translation operation.
+/// Sec 5.1: Translation Fidelity Tracking
+#[derive(Debug, Clone)]
+pub struct TranslationResult {
+    /// Identifier of the translated artifact
+    pub artifact_id: String,
+    /// Type of the translated artifact
+    pub artifact_type: String,
+    /// Whether the translation succeeded
+    pub success: bool,
+    /// Fidelity level of the translation
+    pub fidelity: String,
+    /// Notes about the translation process
+    pub translation_notes: String,
+}
+
+/// Trait defining the interface for framework adapters that translate framework
+/// concepts to CSCI primitives.
+/// Sec 4.2: Framework Adapter Interface
+pub trait IFrameworkAdapter {
+    /// Translate a framework task definition into a cognitive task configuration.
+    fn translate_to_ct(&self, framework_task: &str) -> AdapterResult<CognitiveTaskConfig>;
+
+    /// Translate a CSCI task result back to a framework result.
+    fn translate_from_ct(&self, task_id: &str, result: &str) -> AdapterResult<TranslationResult>;
+
+    /// Map framework memory to semantic memory configuration.
+    fn map_memory(&self, framework_memory: &str) -> AdapterResult<SemanticMemoryConfig>;
+
+    /// Map a framework tool to a tool binding configuration.
+    fn map_tool(&self, framework_tool: &str) -> AdapterResult<ToolBindingConfig>;
+
+    /// Map a framework communication pattern to a semantic channel.
+    fn map_channel(&self, framework_comm: &str) -> AdapterResult<SemanticChannelConfig>;
+
+    /// Get the framework type this adapter supports.
+    fn framework_type(&self) -> crate::framework_type::FrameworkType;
+
+    /// Get the supported version range.
+    fn supported_versions(&self) -> &str;
+
+    /// Check if a framework artifact is compatible with this adapter.
+    fn is_compatible(&self, artifact: &str) -> bool;
 }
 
 #[cfg(test)]

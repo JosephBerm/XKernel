@@ -11,7 +11,7 @@
 //! Sec 4.3: SK Planner Translation
 //! Sec 4.3: SK Memory Mapping
 
-use alloc::{string::String, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::{
     adapter::{CognitiveTaskConfig, IFrameworkAdapter, SemanticChannelConfig, SemanticMemoryConfig, 
               ToolBindingConfig, TranslationResult},
@@ -256,12 +256,12 @@ impl SemanticKernelAdvancedAdapter {
     fn translate_plugin_to_tool(&self, plugin: &SkPlugin) -> AdapterResult<ToolBindingConfig> {
         // Aggregate all functions in the plugin as inputs to the tool binding
         let function_names: Vec<String> = plugin.functions.keys().cloned().collect();
-        let functions_str = alloc::format!("{:?}", function_names);
+        let functions_str = format!("{:?}", function_names);
 
         Ok(ToolBindingConfig {
-            tool_id: alloc::format!("sk-plugin-{}", plugin.plugin_id),
+            tool_id: format!("sk-plugin-{}", plugin.plugin_id),
             name: plugin.name.clone(),
-            description: alloc::format!("{}\nFunctions: {}", plugin.description, functions_str),
+            description: format!("{}\nFunctions: {}", plugin.description, functions_str),
             input_schema: "{}".to_string(),
             output_schema: "{}".to_string(),
             requires_authorization: false,
@@ -272,7 +272,7 @@ impl SemanticKernelAdvancedAdapter {
     /// Sec 4.3: Planner Translation
     pub fn translate_plan_to_spawner(&self, plan: &SkPlan) -> AdapterResult<CtSpawnerDirective> {
         // Create a spawner directive with tasks for each plan step
-        let mut spawner = CtSpawnerDirective::new(alloc::format!("sk-spawner-{}", plan.plan_id));
+        let mut spawner = CtSpawnerDirective::new(format!("sk-spawner-{}", plan.plan_id));
         
         // Build task list from plan steps
         for step in &plan.steps {
@@ -331,7 +331,7 @@ impl IFrameworkAdapter for SemanticKernelAdvancedAdapter {
         }
 
         // Parse as plan definition
-        let task_id = alloc::format!("sk-plan-{}", ulid::Ulid::new());
+        let task_id = format!("sk-plan-{}", ulid::Ulid::new());
         Ok(CognitiveTaskConfig {
             task_id,
             name: "SemanticKernelPlan".to_string(),
@@ -358,7 +358,7 @@ impl IFrameworkAdapter for SemanticKernelAdvancedAdapter {
             ));
         }
 
-        let memory_id = alloc::format!("sk-mem-{}", ulid::Ulid::new());
+        let memory_id = format!("sk-mem-{}", ulid::Ulid::new());
         Ok(SemanticMemoryConfig {
             memory_id,
             memory_type: "kernel_memory".to_string(),
@@ -374,7 +374,7 @@ impl IFrameworkAdapter for SemanticKernelAdvancedAdapter {
             ));
         }
 
-        let tool_id = alloc::format!("sk-tool-{}", ulid::Ulid::new());
+        let tool_id = format!("sk-tool-{}", ulid::Ulid::new());
         Ok(ToolBindingConfig {
             tool_id,
             name: "SemanticKernelSkill".to_string(),
@@ -392,7 +392,7 @@ impl IFrameworkAdapter for SemanticKernelAdvancedAdapter {
             ));
         }
 
-        let channel_id = alloc::format!("sk-ch-{}", ulid::Ulid::new());
+        let channel_id = format!("sk-ch-{}", ulid::Ulid::new());
         Ok(SemanticChannelConfig {
             channel_id,
             name: "SemanticKernelChannel".to_string(),
@@ -475,11 +475,7 @@ pub struct MemoryTierMapping {
 mod tests {
     use super::*;
 use ulid::Ulid;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_sk_plugin_creation() {

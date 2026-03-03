@@ -11,9 +11,9 @@
 use crate::error::AdapterError;
 use crate::AdapterResult;
 use crate::common_utility_lib::{ChainToDagTranslator, ChainNode, DagNode, MemoryMapper, MemoryType, ToolBinding};
-use alloc::collections::BTreeMap; use alloc::vec::Vec;
+use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
-use alloc::collections::BTreeMap as HashMap;
+use std::collections::BTreeMap as HashMap;
 
 /// LangChain chain representation
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -361,11 +361,6 @@ impl LangChainAdapterContext {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
 
     #[test]
     fn test_basic_chain_translator() -> AdapterResult<()> {

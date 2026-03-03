@@ -13,7 +13,6 @@
 //! Sec 4.2: Tool Translation Interface
 //! Sec 4.2: Tool Binding Configuration
 
-use alloc::{string::String, vec::Vec};
 use crate::{AdapterError, framework_type::FrameworkType};
 
 /// Framework-specific tool definition.
@@ -319,10 +318,6 @@ impl ResultDeserializer for AutoGenToolTranslator {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
 
     #[test]
     fn test_framework_tool_creation() {

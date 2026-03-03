@@ -7,7 +7,6 @@
 //!
 //! Reference: Engineering Plan § Agent Lifecycle Management
 
-use alloc::string::String;
 use thiserror::Error;
 
 /// Agent lifecycle error types.
@@ -49,7 +48,7 @@ pub enum LifecycleError {
     #[error("Dependency cycle detected: {agents:?}")]
     DependencyCycle {
         /// Agent identifiers that form the cycle.
-        agents: alloc::vec::Vec<String>,
+        agents: Vec<String>,
     },
 
     /// Agent startup exceeded timeout threshold.
@@ -111,6 +110,16 @@ pub enum LifecycleError {
     /// Occurs during readiness gap, risk, or dependency analysis.
     #[error("Assessment error: {0}")]
     AssessmentError(String),
+
+    /// I/O error during lifecycle operations.
+    #[error("I/O error: {0}")]
+    IoError(String),
+}
+
+impl From<std::io::Error> for LifecycleError {
+    fn from(err: std::io::Error) -> Self {
+        LifecycleError::IoError(err.to_string())
+    }
 }
 
 /// Result type for lifecycle operations.
@@ -123,10 +132,6 @@ pub type Result<T> = core::result::Result<T, LifecycleError>;
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
 
     #[test]
     fn test_invalid_transition_error() {
@@ -152,7 +157,7 @@ use alloc::vec;
 
     #[test]
     fn test_dependency_cycle_error() {
-        let agents = alloc::vec!["agent_a".to_string(), "agent_b".to_string(), "agent_a".to_string()];
+        let agents = vec!["agent_a".to_string(), "agent_b".to_string(), "agent_a".to_string()];
         let err = LifecycleError::DependencyCycle {
             agents: agents.clone(),
         };

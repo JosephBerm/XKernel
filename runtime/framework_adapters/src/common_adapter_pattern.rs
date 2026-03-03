@@ -16,7 +16,7 @@
 //! Sec 4.3: Framework Concept Mapping
 //! Sec 4.2: Adapter Lifecycle
 
-use alloc::{string::String, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::framework_type::FrameworkType;
 use crate::{AdapterResult, error::AdapterError};
 
@@ -153,18 +153,18 @@ impl UniversalFrameworkAdapter for LangChainUniversalAdapter {
         if agent_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty agent definition".into()));
         }
-        Ok(alloc::format!("lc-agent-{}", agent_definition))
+        Ok(format!("lc-agent-{}", agent_definition))
     }
 
     fn translate_plan(&self, plan_definition: &str) -> AdapterResult<String> {
         if plan_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty plan definition".into()));
         }
-        Ok(alloc::format!("lc-spawner-{}", plan_definition))
+        Ok(format!("lc-spawner-{}", plan_definition))
     }
 
     fn spawn_tasks(&self, spawn_directive: &str) -> AdapterResult<Vec<String>> {
-        let task_id = alloc::format!("lc-task-{}", spawn_directive);
+        let task_id = format!("lc-task-{}", spawn_directive);
         Ok(vec![task_id])
     }
 
@@ -172,7 +172,7 @@ impl UniversalFrameworkAdapter for LangChainUniversalAdapter {
         if task_ids.is_empty() {
             return Err(AdapterError::TranslationError("No task IDs provided".into()));
         }
-        Ok(alloc::format!("lc-result-{}", task_ids.len()))
+        Ok(format!("lc-result-{}", task_ids.len()))
     }
 
     fn get_state(&self) -> AdapterLifecycleState {
@@ -224,18 +224,18 @@ impl UniversalFrameworkAdapter for SemanticKernelUniversalAdapter {
         if agent_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty plugin definition".into()));
         }
-        Ok(alloc::format!("sk-plugin-{}", agent_definition))
+        Ok(format!("sk-plugin-{}", agent_definition))
     }
 
     fn translate_plan(&self, plan_definition: &str) -> AdapterResult<String> {
         if plan_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty plan definition".into()));
         }
-        Ok(alloc::format!("sk-spawner-{}", plan_definition))
+        Ok(format!("sk-spawner-{}", plan_definition))
     }
 
     fn spawn_tasks(&self, spawn_directive: &str) -> AdapterResult<Vec<String>> {
-        let task_id = alloc::format!("sk-task-{}", spawn_directive);
+        let task_id = format!("sk-task-{}", spawn_directive);
         Ok(vec![task_id])
     }
 
@@ -243,7 +243,7 @@ impl UniversalFrameworkAdapter for SemanticKernelUniversalAdapter {
         if task_ids.is_empty() {
             return Err(AdapterError::TranslationError("No task IDs provided".into()));
         }
-        Ok(alloc::format!("sk-result-{}", task_ids.len()))
+        Ok(format!("sk-result-{}", task_ids.len()))
     }
 
     fn get_state(&self) -> AdapterLifecycleState {
@@ -295,18 +295,18 @@ impl UniversalFrameworkAdapter for AutoGenUniversalAdapter {
         if agent_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty agent definition".into()));
         }
-        Ok(alloc::format!("ag-agent-{}", agent_definition))
+        Ok(format!("ag-agent-{}", agent_definition))
     }
 
     fn translate_plan(&self, plan_definition: &str) -> AdapterResult<String> {
         if plan_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty plan definition".into()));
         }
-        Ok(alloc::format!("ag-spawner-{}", plan_definition))
+        Ok(format!("ag-spawner-{}", plan_definition))
     }
 
     fn spawn_tasks(&self, spawn_directive: &str) -> AdapterResult<Vec<String>> {
-        let task_id = alloc::format!("ag-task-{}", spawn_directive);
+        let task_id = format!("ag-task-{}", spawn_directive);
         Ok(vec![task_id])
     }
 
@@ -314,7 +314,7 @@ impl UniversalFrameworkAdapter for AutoGenUniversalAdapter {
         if task_ids.is_empty() {
             return Err(AdapterError::TranslationError("No task IDs provided".into()));
         }
-        Ok(alloc::format!("ag-result-{}", task_ids.len()))
+        Ok(format!("ag-result-{}", task_ids.len()))
     }
 
     fn get_state(&self) -> AdapterLifecycleState {
@@ -366,18 +366,18 @@ impl UniversalFrameworkAdapter for CrewAIUniversalAdapter {
         if agent_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty agent definition".into()));
         }
-        Ok(alloc::format!("crew-agent-{}", agent_definition))
+        Ok(format!("crew-agent-{}", agent_definition))
     }
 
     fn translate_plan(&self, plan_definition: &str) -> AdapterResult<String> {
         if plan_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty task definition".into()));
         }
-        Ok(alloc::format!("crew-spawner-{}", plan_definition))
+        Ok(format!("crew-spawner-{}", plan_definition))
     }
 
     fn spawn_tasks(&self, spawn_directive: &str) -> AdapterResult<Vec<String>> {
-        let task_id = alloc::format!("crew-task-{}", spawn_directive);
+        let task_id = format!("crew-task-{}", spawn_directive);
         Ok(vec![task_id])
     }
 
@@ -385,7 +385,7 @@ impl UniversalFrameworkAdapter for CrewAIUniversalAdapter {
         if task_ids.is_empty() {
             return Err(AdapterError::TranslationError("No task IDs provided".into()));
         }
-        Ok(alloc::format!("crew-result-{}", task_ids.len()))
+        Ok(format!("crew-result-{}", task_ids.len()))
     }
 
     fn get_state(&self) -> AdapterLifecycleState {
@@ -433,18 +433,18 @@ impl UniversalFrameworkAdapter for CustomFrameworkUniversalAdapter {
         if agent_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty entity definition".into()));
         }
-        Ok(alloc::format!("custom-{}-entity-{}", self.framework_name, agent_definition))
+        Ok(format!("custom-{}-entity-{}", self.framework_name, agent_definition))
     }
 
     fn translate_plan(&self, plan_definition: &str) -> AdapterResult<String> {
         if plan_definition.is_empty() {
             return Err(AdapterError::TranslationError("Empty plan definition".into()));
         }
-        Ok(alloc::format!("custom-{}-spawner-{}", self.framework_name, plan_definition))
+        Ok(format!("custom-{}-spawner-{}", self.framework_name, plan_definition))
     }
 
     fn spawn_tasks(&self, spawn_directive: &str) -> AdapterResult<Vec<String>> {
-        let task_id = alloc::format!("custom-{}-task-{}", self.framework_name, spawn_directive);
+        let task_id = format!("custom-{}-task-{}", self.framework_name, spawn_directive);
         Ok(vec![task_id])
     }
 
@@ -452,7 +452,7 @@ impl UniversalFrameworkAdapter for CustomFrameworkUniversalAdapter {
         if task_ids.is_empty() {
             return Err(AdapterError::TranslationError("No task IDs provided".into()));
         }
-        Ok(alloc::format!("custom-{}-result-{}", self.framework_name, task_ids.len()))
+        Ok(format!("custom-{}-result-{}", self.framework_name, task_ids.len()))
     }
 
     fn get_state(&self) -> AdapterLifecycleState {
@@ -470,12 +470,7 @@ impl UniversalFrameworkAdapter for CustomFrameworkUniversalAdapter {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::BTreeMap;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
+use std::collections::BTreeMap;
 
     #[test]
     fn test_adapter_lifecycle_state_as_str() {

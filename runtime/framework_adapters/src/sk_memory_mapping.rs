@@ -15,7 +15,7 @@
 //! Sec 3.3: Memory Tier Architecture
 //! Sec 4.3: Episodic vs Semantic Storage
 
-use alloc::{string::String, vec::Vec, collections::BTreeMap};
+use std::collections::BTreeMap;
 use crate::AdapterResult;
 use crate::error::AdapterError;
 
@@ -342,7 +342,7 @@ impl SkMemoryMapper {
         buffer: &SkMemoryBuffer,
         contents: String,
     ) -> AdapterResult<L2EpisodicSnapshot> {
-        let snapshot_id = alloc::format!("l2-snap-{}", buffer.buffer_id);
+        let snapshot_id = format!("l2-snap-{}", buffer.buffer_id);
         let size_bytes = contents.len() as u64;
         
         let mut snapshot = L2EpisodicSnapshot::new(
@@ -367,7 +367,7 @@ impl SkMemoryMapper {
         buffer: &SkMemoryBuffer,
         content: String,
     ) -> AdapterResult<L3SemanticRecord> {
-        let record_id = alloc::format!("l3-rec-{}", buffer.buffer_id);
+        let record_id = format!("l3-rec-{}", buffer.buffer_id);
         
         let mut record = L3SemanticRecord::new(
             record_id,
@@ -400,7 +400,7 @@ impl SkMemoryMapper {
         match map.migration_strategy.as_str() {
             "stay" => "Keep in current tier".to_string(),
             "demote_if_inactive" => {
-                alloc::format!(
+                format!(
                     "Consider demoting to {} if access becomes infrequent",
                     map.target_tier.as_str()
                 )
@@ -416,10 +416,6 @@ impl SkMemoryMapper {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
 
     #[test]
     fn test_sk_buffer_type_as_str() {
