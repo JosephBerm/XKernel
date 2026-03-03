@@ -7,7 +7,7 @@ description = "Cognitive Substrate Syscall Interface (CSCI) v0.1 specification a
 
 [dependencies]
 ulid = { workspace = true }
-serde = { workspace = true, features = ["alloc"] }
+serde = { workspace = true }
 thiserror = { workspace = true }
 bitflags = { workspace = true }
 

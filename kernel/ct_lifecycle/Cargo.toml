@@ -12,6 +12,7 @@ crate-type = ["lib"]
 serde = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+ulid = { workspace = true }
 
 [dev-dependencies]
 tempfile = "3.8"
