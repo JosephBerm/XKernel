@@ -55,6 +55,22 @@ obj/
 Thumbs.db
 *.log
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.pytest_cache/
+.ruff_cache/
+*.whl
+pip-log.txt
+
+# Claude Code
+.claude/
+
+# Extracted docs
+docx_content.txt
+
 # Temporary files
 *.tmp
 *.bak
