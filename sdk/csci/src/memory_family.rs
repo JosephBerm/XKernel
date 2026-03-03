@@ -315,8 +315,8 @@ pub fn mem_mount_definition() -> SyscallDefinition {
 /// Get all Memory family syscall definitions.
 ///
 /// Returns a vector of all four syscall definitions in the Memory family.
-pub fn all_definitions() -> alloc::vec::Vec<SyscallDefinition> {
-    alloc::vec![
+pub fn all_definitions() -> Vec<SyscallDefinition> {
+    vec![
         mem_alloc_definition(),
         mem_read_definition(),
         mem_write_definition(),
@@ -327,8 +327,8 @@ pub fn all_definitions() -> alloc::vec::Vec<SyscallDefinition> {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::vec::Vec;
-use alloc::vec;
+
+
 
     #[test]
     fn test_mem_alloc_definition() {

@@ -13,8 +13,8 @@
 use crate::error_codes::CsciErrorCode;
 use crate::syscall::{ParamType, ReturnType, SyscallDefinition, SyscallFamily, SyscallParam};
 use crate::types::{AgentID, CapabilitySet, CTID};
-use alloc::string::String;
-use alloc::vec::Vec;
+
+
 use core::fmt;
 
 /// Crew family syscall numbers.
@@ -418,8 +418,8 @@ pub fn crew_query_definition() -> SyscallDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::string::ToString;
-use alloc::vec;
+
+
 
     #[test]
     fn test_crew_id_display() {
@@ -513,7 +513,7 @@ use alloc::vec;
         assert_eq!(def.family, SyscallFamily::Crew);
         assert_eq!(def.number, number::CREW_CREATE);
         assert!(!def.description.is_empty());
-        assert!(!def.errors.is_empty());
+        assert!(!def.error_codes.is_empty());
     }
 
     #[test]
@@ -522,7 +522,7 @@ use alloc::vec;
         assert_eq!(def.name, "crew_join");
         assert_eq!(def.family, SyscallFamily::Crew);
         assert_eq!(def.number, number::CREW_JOIN);
-        assert_eq!(def.params.len(), 3);
+        assert_eq!(def.parameters.len(), 3);
     }
 
     #[test]
@@ -531,7 +531,7 @@ use alloc::vec;
         assert_eq!(def.name, "crew_leave");
         assert_eq!(def.family, SyscallFamily::Crew);
         assert_eq!(def.number, number::CREW_LEAVE);
-        assert_eq!(def.params.len(), 2);
+        assert_eq!(def.parameters.len(), 2);
     }
 
     #[test]

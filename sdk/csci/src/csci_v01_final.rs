@@ -10,7 +10,7 @@
 
 use crate::error_codes::CsciErrorCode;
 use crate::syscall::{ParamType, ReturnType, SyscallFamily};
-use alloc::string::String;
+
 
 /// Complete syscall specification for SDK generation.
 ///
@@ -29,11 +29,11 @@ pub struct FinalizedSyscallSpec {
     /// Number of parameters.
     pub parameter_count: u8,
     /// Parameter names and types.
-    pub parameter_specs: alloc::vec::Vec<ParameterSpec>,
+    pub parameter_specs: Vec<ParameterSpec>,
     /// Return type.
     pub return_type: ReturnType,
     /// Possible error codes.
-    pub error_codes: alloc::vec::Vec<CsciErrorCode>,
+    pub error_codes: Vec<CsciErrorCode>,
     /// Capability bit required (usually family capability).
     pub required_capability: u32,
     /// Human-readable description.
@@ -130,7 +130,7 @@ impl CsciV01Final {
     }
 
     /// Flatten all syscalls into a single list.
-    pub fn all_syscalls_flat() -> alloc::vec::Vec<&'static str> {
+    pub fn all_syscalls_flat() -> Vec<&'static str> {
         Self::all_syscalls()
             .iter()
             .flat_map(|family| family.iter().copied())
@@ -257,7 +257,7 @@ pub fn total_v01_syscalls() -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::vec::Vec;
+
 
     #[test]
     fn test_csci_v01_final_constants() {

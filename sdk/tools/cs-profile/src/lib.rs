@@ -11,18 +11,18 @@
 //! - **ProfileMetrics**: Performance metric collection
 //! - **Flamegraph**: Call stack visualization data
 
-#![no_std]
+
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-extern crate alloc;
 
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
+
+
+
+use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
-use alloc::format;
-use alloc::string::ToString;
+
+
 
 /// Profile metric type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

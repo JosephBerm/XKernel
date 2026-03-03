@@ -11,17 +11,17 @@
 //! - **ReplayConfig**: Replay configuration parameters
 //! - **ReplayResult**: Replay execution results
 
-#![no_std]
+
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-extern crate alloc;
 
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
+
+
+
+use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
-use alloc::string::ToString;
+
 
 /// Replay mode
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

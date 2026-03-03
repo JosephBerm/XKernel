@@ -11,19 +11,19 @@
 //! - **TraceFilter**: Event filtering criteria
 //! - **TraceOutput**: Structured trace output
 
-#![no_std]
+
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-extern crate alloc;
 
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
+
+
+
+use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
-use alloc::format;
-use alloc::vec;
-use alloc::string::ToString;
+
+
+
 
 /// Trace event type
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -300,7 +300,7 @@ mod tests {
     #[test]
     fn test_trace_filter_by_type() {
         let mut filter = TraceFilter::all();
-        filter.event_types = alloc::vec![TraceEventType::TaskSpawn];
+        filter.event_types = vec![TraceEventType::TaskSpawn];
 
         let entry1 = TraceEntry {
             timestamp_ns: 1000,

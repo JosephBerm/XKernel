@@ -11,8 +11,8 @@
 use crate::error_codes::CsciErrorCode;
 use crate::syscall::{ParamType, ReturnType, SyscallDefinition, SyscallFamily, SyscallParam};
 use crate::types::{AgentID, CapabilitySet, CTID};
-use alloc::string::String;
-use alloc::vec::Vec;
+
+
 use core::fmt;
 
 /// Telemetry family syscall numbers.
@@ -394,7 +394,7 @@ pub fn trace_query_definition() -> SyscallDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::string::ToString;
+
 
     #[test]
     fn test_event_id_display() {

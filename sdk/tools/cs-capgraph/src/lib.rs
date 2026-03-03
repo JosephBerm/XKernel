@@ -13,19 +13,19 @@
 //! - **GraphQuery**: Query interface for capability analysis
 //! - **GraphVisualization**: Output formats for visualization
 
-#![no_std]
+
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-extern crate alloc;
 
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
+
+
+
+use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
-use alloc::format;
-use alloc::vec;
-use alloc::string::ToString;
+
+
+
 
 /// Capability type
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -299,7 +299,7 @@ mod tests {
         let node = GraphNode {
             id: "task1".to_string(),
             node_type: "task".to_string(),
-            capabilities: alloc::vec![CapabilityType::Read],
+            capabilities: vec![CapabilityType::Read],
             parent: None,
             metadata: BTreeMap::new(),
         };
@@ -465,7 +465,7 @@ mod tests {
         let node = GraphNode {
             id: "task1".to_string(),
             node_type: "task".to_string(),
-            capabilities: alloc::vec![CapabilityType::Read, CapabilityType::Write],
+            capabilities: vec![CapabilityType::Read, CapabilityType::Write],
             parent: None,
             metadata: BTreeMap::new(),
         };

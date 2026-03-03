@@ -221,19 +221,19 @@ impl fmt::Display for MemoryTier {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MemorySlice {
     /// The bytes in this slice.
-    pub data: alloc::vec::Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl MemorySlice {
     /// Create a new memory slice from a byte vector.
-    pub fn new(data: alloc::vec::Vec<u8>) -> Self {
+    pub fn new(data: Vec<u8>) -> Self {
         Self { data }
     }
 
     /// Create a memory slice from a byte slice by copying.
     pub fn from_slice(data: &[u8]) -> Self {
         Self {
-            data: alloc::vec::Vec::from(data),
+            data: Vec::from(data),
         }
     }
 
@@ -268,19 +268,19 @@ impl MemorySlice {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KnowledgeSourceRef {
     /// URI or identifier for the knowledge source.
-    pub source_id: alloc::string::String,
+    pub source_id: String,
 }
 
 impl KnowledgeSourceRef {
     /// Create a new knowledge source reference.
-    pub fn new(source_id: alloc::string::String) -> Self {
+    pub fn new(source_id: String) -> Self {
         Self { source_id }
     }
 
     /// Create from a string slice.
     pub fn from_str(source_id: &str) -> Self {
         Self {
-            source_id: alloc::string::String::from(source_id),
+            source_id: String::from(source_id),
         }
     }
 }
@@ -292,19 +292,19 @@ impl KnowledgeSourceRef {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MountPoint {
     /// Path-like mount point (e.g., "/knowledge/embeddings/v1").
-    pub path: alloc::string::String,
+    pub path: String,
 }
 
 impl MountPoint {
     /// Create a new mount point.
-    pub fn new(path: alloc::string::String) -> Self {
+    pub fn new(path: String) -> Self {
         Self { path }
     }
 
     /// Create from a string slice.
     pub fn from_str(path: &str) -> Self {
         Self {
-            path: alloc::string::String::from(path),
+            path: String::from(path),
         }
     }
 }
@@ -521,12 +521,12 @@ pub struct MessagePayload {
     /// Message type identifier (application-defined).
     pub msg_type: u32,
     /// Serialized message data.
-    pub data: alloc::vec::Vec<u8>,
+    pub data: Vec<u8>,
 }
 
 impl MessagePayload {
     /// Create a new message payload.
-    pub fn new(msg_type: u32, data: alloc::vec::Vec<u8>) -> Self {
+    pub fn new(msg_type: u32, data: Vec<u8>) -> Self {
         Self { msg_type, data }
     }
 
@@ -534,7 +534,7 @@ impl MessagePayload {
     pub fn from_slice(msg_type: u32, data: &[u8]) -> Self {
         Self {
             msg_type,
-            data: alloc::vec::Vec::from(data),
+            data: Vec::from(data),
         }
     }
 
@@ -569,13 +569,13 @@ impl fmt::Display for ToolBindingID {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ToolSpec {
     /// Tool name/identifier.
-    pub name: alloc::string::String,
+    pub name: String,
     /// Tool version.
-    pub version: alloc::string::String,
+    pub version: String,
     /// Brief description of the tool.
-    pub description: alloc::string::String,
+    pub description: String,
     /// Tool type (e.g., "mcp_tool", "web_search", "code_executor").
-    pub tool_type: alloc::string::String,
+    pub tool_type: String,
 }
 
 impl ToolSpec {
@@ -587,10 +587,10 @@ impl ToolSpec {
         tool_type: &str,
     ) -> Self {
         Self {
-            name: alloc::string::String::from(name),
-            version: alloc::string::String::from(version),
-            description: alloc::string::String::from(description),
-            tool_type: alloc::string::String::from(tool_type),
+            name: String::from(name),
+            version: String::from(version),
+            description: String::from(description),
+            tool_type: String::from(tool_type),
         }
     }
 }
@@ -665,22 +665,22 @@ impl Default for SandboxConfig {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ToolArguments {
     /// Named arguments as key-value pairs.
-    pub args: alloc::vec::Vec<(alloc::string::String, alloc::string::String)>,
+    pub args: Vec<(String, String)>,
 }
 
 impl ToolArguments {
     /// Create a new tool arguments container.
     pub fn new() -> Self {
         Self {
-            args: alloc::vec::Vec::new(),
+            args: Vec::new(),
         }
     }
 
     /// Add an argument.
     pub fn add_arg(mut self, key: &str, value: &str) -> Self {
         self.args.push((
-            alloc::string::String::from(key),
-            alloc::string::String::from(value),
+            String::from(key),
+            String::from(value),
         ));
         self
     }
@@ -711,18 +711,18 @@ pub struct ToolResult {
     /// Exit status code (0 = success).
     pub status: u32,
     /// Output data from the tool.
-    pub output: alloc::vec::Vec<u8>,
+    pub output: Vec<u8>,
     /// Optional error message.
-    pub error_message: alloc::string::String,
+    pub error_message: String,
 }
 
 impl ToolResult {
     /// Create a successful tool result.
-    pub fn success(output: alloc::vec::Vec<u8>) -> Self {
+    pub fn success(output: Vec<u8>) -> Self {
         Self {
             status: 0,
             output,
-            error_message: alloc::string::String::new(),
+            error_message: String::new(),
         }
     }
 
@@ -730,8 +730,8 @@ impl ToolResult {
     pub fn failure(status: u32, error_message: &str) -> Self {
         Self {
             status,
-            output: alloc::vec::Vec::new(),
-            error_message: alloc::string::String::from(error_message),
+            output: Vec::new(),
+            error_message: String::from(error_message),
         }
     }
 
@@ -766,9 +766,9 @@ impl fmt::Display for CapabilityID {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CapabilitySpec {
     /// Capability name (e.g., "read_memory", "invoke_tool").
-    pub name: alloc::string::String,
+    pub name: String,
     /// Capability resource (e.g., memory region ID, tool ID).
-    pub resource: alloc::string::String,
+    pub resource: String,
     /// Access level (0=none, 1=limited, 2=full).
     pub access_level: u8,
 }
@@ -777,8 +777,8 @@ impl CapabilitySpec {
     /// Create a new capability specification.
     pub fn new(name: &str, resource: &str, access_level: u8) -> Self {
         Self {
-            name: alloc::string::String::from(name),
-            resource: alloc::string::String::from(resource),
+            name: String::from(name),
+            resource: String::from(resource),
             access_level: core::cmp::min(access_level, 2),
         }
     }
@@ -956,9 +956,9 @@ pub struct TelemetryEvent {
     /// Event severity level (0=info, 1=warn, 2=error).
     pub severity: u8,
     /// Event message.
-    pub message: alloc::string::String,
+    pub message: String,
     /// Additional context key-value pairs.
-    pub context: alloc::vec::Vec<(alloc::string::String, alloc::string::String)>,
+    pub context: Vec<(String, String)>,
 }
 
 impl TelemetryEvent {
@@ -968,16 +968,16 @@ impl TelemetryEvent {
             event_type,
             timestamp_ms,
             severity: core::cmp::min(severity, 2),
-            message: alloc::string::String::from(message),
-            context: alloc::vec::Vec::new(),
+            message: String::from(message),
+            context: Vec::new(),
         }
     }
 
     /// Add context information.
     pub fn with_context(mut self, key: &str, value: &str) -> Self {
         self.context.push((
-            alloc::string::String::from(key),
-            alloc::string::String::from(value),
+            String::from(key),
+            String::from(value),
         ));
         self
     }
@@ -986,10 +986,10 @@ impl TelemetryEvent {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
+
+
+
+
 
     #[test]
     fn test_ctid_display() {
@@ -1049,7 +1049,7 @@ use alloc::vec;
 
     #[test]
     fn test_memory_slice_empty() {
-        let slice = MemorySlice::new(alloc::vec::Vec::new());
+        let slice = MemorySlice::new(Vec::new());
         assert!(slice.is_empty());
     }
 
@@ -1157,7 +1157,7 @@ use alloc::vec;
 
     #[test]
     fn test_message_payload_creation() {
-        let payload = MessagePayload::new(42, alloc::vec![1, 2, 3]);
+        let payload = MessagePayload::new(42, vec![1, 2, 3]);
         assert_eq!(payload.msg_type, 42);
         assert_eq!(payload.size(), 3);
     }
@@ -1208,7 +1208,7 @@ use alloc::vec;
 
     #[test]
     fn test_tool_result_success() {
-        let result = ToolResult::success(alloc::vec![1, 2, 3]);
+        let result = ToolResult::success(vec![1, 2, 3]);
         assert!(result.is_success());
         assert_eq!(result.status, 0);
     }

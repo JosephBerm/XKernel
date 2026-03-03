@@ -292,8 +292,8 @@ pub fn ct_resume_definition() -> SyscallDefinition {
 /// Get all Task family syscall definitions.
 ///
 /// Returns a vector of all four syscall definitions in the Task family.
-pub fn all_definitions() -> alloc::vec::Vec<SyscallDefinition> {
-    alloc::vec![
+pub fn all_definitions() -> Vec<SyscallDefinition> {
+    vec![
         ct_spawn_definition(),
         ct_yield_definition(),
         ct_checkpoint_definition(),
@@ -304,8 +304,8 @@ pub fn all_definitions() -> alloc::vec::Vec<SyscallDefinition> {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::vec::Vec;
-use alloc::vec;
+
+
 
     #[test]
     fn test_ct_spawn_definition() {

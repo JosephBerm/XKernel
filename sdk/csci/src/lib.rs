@@ -19,16 +19,12 @@
 //! requires explicit capability grants, enabling fine-grained security models for the
 //! cognitive substrate kernel.
 //!
-//! ## No Std
+//! ## Standard Library
 //!
-//! This crate is `#![no_std]` to support kernel-space code. It requires `alloc` for
-//! dynamic allocations.
+//! This crate uses the standard library as an L3 SDK crate.
 
-#![no_std]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
-
-extern crate alloc;
 
 pub mod api_stability;
 pub mod crew_family;
@@ -82,7 +78,6 @@ pub const WEEK_4_COMPLETE: bool = true;
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::vec::Vec;
 
     #[test]
     fn test_csci_version_format() {

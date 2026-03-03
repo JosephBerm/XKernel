@@ -7,8 +7,8 @@
 //! # Engineering Plan Reference
 //! Section 9: RFC Review and Specification Approval Process.
 
-use alloc::string::String;
-use alloc::vec::Vec;
+
+
 use core::fmt;
 
 /// Status of an RFC during the review process.
@@ -385,8 +385,8 @@ pub fn create_csci_v01_rfc() -> RfcEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::string::ToString;
-use alloc::vec;
+
+
 
     #[test]
     fn test_rfc_status_display() {

@@ -11,18 +11,18 @@
 //! - **TopView**: Real-time metrics display data
 //! - **TopMetrics**: Individual task metrics
 
-#![no_std]
+
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-extern crate alloc;
 
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
+
+
+
+use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
-use alloc::format;
-use alloc::string::ToString;
+
+
 
 /// Task metrics for display
 #[derive(Debug, Clone, Serialize, Deserialize)]

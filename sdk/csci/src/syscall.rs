@@ -7,8 +7,8 @@
 //! Section 6: CSCI Syscall Definitions.
 
 use crate::error_codes::CsciErrorCode;
-use alloc::string::String;
-use alloc::vec::Vec;
+
+
 use core::fmt;
 
 /// Syscall family classification.
@@ -232,8 +232,8 @@ impl SyscallDefinition {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::ToString;
+
+
 
     #[test]
     fn test_syscall_family_display() {

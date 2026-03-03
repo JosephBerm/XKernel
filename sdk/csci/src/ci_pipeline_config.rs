@@ -13,11 +13,11 @@
 //! 6. Publish to Registries (npm, NuGet)
 
 use serde::{Deserialize, Serialize};
-use alloc::collections::BTreeMap as HashMap;
+use std::collections::BTreeMap as HashMap;
 use core::fmt;
 
 /// Strongly-typed lint rule identifier
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct LintRuleId(String);
 
 impl LintRuleId {
@@ -537,11 +537,11 @@ impl PipelineResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
+
+
+
+
+
 
     #[test]
     fn test_lint_config_eslint() {

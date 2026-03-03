@@ -19,33 +19,39 @@ struct Cli {
 enum Commands {
     /// Package management (cs-pkg)
     Pkg {
-        #[command(subcommand)]
-        subcommand: Option<String>,
+        /// Arguments to pass through
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
     },
     /// Tracing and debugging (cs-trace)
     Trace {
-        #[command(subcommand)]
-        subcommand: Option<String>,
+        /// Arguments to pass through
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
     },
     /// Replay debugger (cs-replay)
     Replay {
-        #[command(subcommand)]
-        subcommand: Option<String>,
+        /// Arguments to pass through
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
     },
     /// Profiler (cs-profile)
     Profile {
-        #[command(subcommand)]
-        subcommand: Option<String>,
+        /// Arguments to pass through
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
     },
     /// Capability graph (cs-capgraph)
     Capgraph {
-        #[command(subcommand)]
-        subcommand: Option<String>,
+        /// Arguments to pass through
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
     },
     /// System monitor (cs-top)
     Top {
-        #[command(subcommand)]
-        subcommand: Option<String>,
+        /// Arguments to pass through
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
     },
     /// Show version information
     Version,
@@ -55,23 +61,23 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Pkg { subcommand } => {
-            dispatch_tool("cs-pkg", subcommand);
+        Commands::Pkg { args } => {
+            dispatch_tool("cs-pkg", &args);
         }
-        Commands::Trace { subcommand } => {
-            dispatch_tool("cs-trace", subcommand);
+        Commands::Trace { args } => {
+            dispatch_tool("cs-trace", &args);
         }
-        Commands::Replay { subcommand } => {
-            dispatch_tool("cs-replay", subcommand);
+        Commands::Replay { args } => {
+            dispatch_tool("cs-replay", &args);
         }
-        Commands::Profile { subcommand } => {
-            dispatch_tool("cs-profile", subcommand);
+        Commands::Profile { args } => {
+            dispatch_tool("cs-profile", &args);
         }
-        Commands::Capgraph { subcommand } => {
-            dispatch_tool("cs-capgraph", subcommand);
+        Commands::Capgraph { args } => {
+            dispatch_tool("cs-capgraph", &args);
         }
-        Commands::Top { subcommand } => {
-            dispatch_tool("cs-top", subcommand);
+        Commands::Top { args } => {
+            dispatch_tool("cs-top", &args);
         }
         Commands::Version => {
             println!("cs-ctl version 1.0.0");
@@ -80,10 +86,10 @@ fn main() {
     }
 }
 
-fn dispatch_tool(tool_name: &str, _subcommand: Option<String>) {
+fn dispatch_tool(tool_name: &str, args: &[String]) {
     println!("Dispatching to {}", tool_name);
 
     let _result = Command::new(tool_name)
-        .args(std::env::args().skip(2))
+        .args(args)
         .status();
 }

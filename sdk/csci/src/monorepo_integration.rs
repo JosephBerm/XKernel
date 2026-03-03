@@ -10,9 +10,9 @@
 //! - Support polyglot environments (Rust, TypeScript, C#)
 
 use serde::{Deserialize, Serialize};
-use alloc::collections::BTreeMap as HashMap;
-use alloc::collections::BTreeSet as HashSet;
-use alloc::collections::VecDeque;
+use std::collections::BTreeMap as HashMap;
+use std::collections::BTreeSet as HashSet;
+use std::collections::VecDeque;
 use core::fmt;
 
 /// Strongly-typed version identifier for workspace packages
@@ -387,12 +387,12 @@ impl Default for WorkspaceConfig {
 #[cfg(test)]
 mod tests {
     use super::*;
-use alloc::collections::VecDeque;
-use alloc::format;
-use alloc::string::String;
-use alloc::string::ToString;
-use alloc::vec::Vec;
-use alloc::vec;
+use std::collections::VecDeque;
+
+
+
+
+
 
     #[test]
     fn test_version_parsing() {
