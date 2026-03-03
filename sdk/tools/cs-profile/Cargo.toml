@@ -1,0 +1,15 @@
+[package]
+name = "cs-profile"
+version = "1.0.0"
+edition = "2021"
+authors = ["XKernal Contributors"]
+license = "Apache-2.0"
+description = "Cognitive Substrate profiler CLI"
+repository = "https://github.com/xkernal/cognitive-substrate"
+
+[[bin]]
+name = "cs-profile"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }

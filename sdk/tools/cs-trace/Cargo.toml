@@ -1,0 +1,15 @@
+[package]
+name = "cs-trace"
+version = "1.0.0"
+edition = "2021"
+authors = ["XKernal Contributors"]
+license = "Apache-2.0"
+description = "Cognitive Substrate tracing and debugging CLI"
+repository = "https://github.com/xkernal/cognitive-substrate"
+
+[[bin]]
+name = "cs-trace"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }

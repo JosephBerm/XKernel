@@ -1,0 +1,17 @@
+[package]
+name = "cs-gpu_accelerator"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "GPU Manager Service - Phase A (v1.0) Architecture"
+authors = ["Cognitive Substrate Project"]
+
+[dependencies]
+ulid = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+bitflags = { workspace = true }
+
+[dev-dependencies]
+# Test dependencies can use std if needed
+

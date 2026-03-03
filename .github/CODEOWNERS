@@ -1,0 +1,83 @@
+# Cognitive Substrate Code Ownership
+#
+# Week 5 Deliverable: Code ownership and review requirements
+# Engineer: 10 (Tooling, Packaging & Documentation)
+# Date: 2026-03-01
+#
+# Format: path @owner1 @owner2 ...
+# Default owners required for PR approval (see ci/merge_gate.yml)
+#
+# Reference: DEVELOPMENT.md -> Code Review Responsibilities
+#
+# This file defines which team members own specific code paths.
+# PRs affecting owned paths require approval from the owner.
+
+# ==============================================================================
+# KERNEL STREAM - Engineer 01 (CT Lifecycle, Scheduler, Capabilities)
+# ==============================================================================
+
+kernel/                         @engineer-01 @engineer-10
+kernel/ct_lifecycle/            @engineer-01
+kernel/capability_engine/       @engineer-01
+kernel/ipc_signals_exceptions/  @engineer-01
+
+# ==============================================================================
+# SERVICES STREAM - Engineer 02 (GPU, Memory, Tools)
+# ==============================================================================
+
+services/                       @engineer-02 @engineer-10
+services/semantic_memory/       @engineer-02
+services/gpu_accelerator/       @engineer-02
+services/tool_registry_telemetry/ @engineer-02
+
+# ==============================================================================
+# RUNTIME STREAM - Engineer 03 (Framework Adapters, Lifecycle)
+# ==============================================================================
+
+runtime/                        @engineer-03 @engineer-10
+runtime/framework_adapters/     @engineer-03
+runtime/semantic_fs_agent_lifecycle/ @engineer-03
+
+# ==============================================================================
+# SDK STREAM - Engineer 04-06 (Client Libraries, Tools, Bindings)
+# ==============================================================================
+
+sdk/                            @engineer-04 @engineer-05 @engineer-06 @engineer-10
+sdk/csci/                       @engineer-04
+sdk/libcognitive/               @engineer-04
+sdk/tools/                      @engineer-05
+
+# ==============================================================================
+# TESTING - All Engineers
+# ==============================================================================
+
+tests/                          @engineer-01 @engineer-02 @engineer-03 @engineer-04 @engineer-10
+benches/                        @engineer-01 @engineer-02 @engineer-03 @engineer-04 @engineer-10
+
+# ==============================================================================
+# BUILD & CI/CD - Engineer 10 (Tooling, Packaging & Documentation)
+# ==============================================================================
+
+.github/                        @engineer-10
+.bazelversion                   @engineer-10
+WORKSPACE.bazel                 @engineer-10
+build/                          @engineer-10
+ci/                             @engineer-10
+Cargo.toml                      @engineer-10
+Cargo.lock                      @engineer-10
+
+# ==============================================================================
+# DOCUMENTATION & PROJECT - Engineer 10
+# ==============================================================================
+
+docs/                           @engineer-10
+*.md                            @engineer-10
+README*                         @engineer-10
+DEVELOPMENT.md                  @engineer-10
+CODE_OF_CONDUCT.md              @engineer-10
+
+# ==============================================================================
+# DEFAULT - All engineers responsible
+# ==============================================================================
+
+*                               @engineer-10

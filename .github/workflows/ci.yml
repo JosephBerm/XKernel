@@ -1,0 +1,470 @@
+# Cognitive Substrate - GitHub Actions CI Pipeline
+#
+# Week 5 Deliverable: Automated CI/CD infrastructure
+# Engineer: 10 (Tooling, Packaging & Documentation)
+# Date: 2026-03-01
+#
+# Pipeline: PR creation, push to main, release tags
+# Stages: Build → Lint → Unit Test → Integration Test → Benchmark
+# Target: All stages within 30 minutes
+#
+# Documentation: docs/ci_cd_guide.md
+
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 3
+
+jobs:
+  # ===========================================================================
+  # Metadata and Setup
+  # ===========================================================================
+  
+  metadata:
+    name: Gather CI Metadata
+    runs-on: ubuntu-latest
+    outputs:
+      commit_hash: ${{ steps.meta.outputs.commit_hash }}
+      commit_date: ${{ steps.meta.outputs.commit_date }}
+      run_id: ${{ github.run_id }}
+      trigger: ${{ github.event_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: meta
+        name: Extract metadata
+        run: |
+          echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_date=$(git log -1 --format='%aI')" >> $GITHUB_OUTPUT
+
+  # ===========================================================================
+  # BUILD STAGE: Hermetic Bazel builds across x86_64 and ARM64
+  # ===========================================================================
+
+  build-linux-x86_64:
+    name: Build Linux x86_64
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Bazel
+        run: |
+          echo "$(cat .bazelversion)" > /tmp/bazel_version.txt
+          export BAZEL_VERSION=$(cat /tmp/bazel_version.txt)
+          echo "Bazel version: $BAZEL_VERSION"
+      
+      - name: Cache Bazel build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelrc
+          key: ${{ runner.os }}-bazel-${{ hashFiles('WORKSPACE.bazel', '.bazelversion') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+      
+      - name: Build all targets (x86_64)
+        run: |
+          bazel build //... \
+            --config=ci \
+            --verbose_failures \
+            --cpu=k8 \
+            --extra_toolchains=@local_config_cc//:cc_toolchain
+      
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-x86_64
+          path: |
+            bazel-bin/
+            bazel-out/*/logs/
+          retention-days: 7
+
+  build-linux-arm64:
+    name: Build Linux ARM64
+    runs-on: ubuntu-latest-arm64
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Bazel
+        run: |
+          echo "$(cat .bazelversion)" > /tmp/bazel_version.txt
+          export BAZEL_VERSION=$(cat /tmp/bazel_version.txt)
+          echo "Bazel version: $BAZEL_VERSION"
+      
+      - name: Cache Bazel build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelrc
+          key: ${{ runner.os }}-bazel-arm64-${{ hashFiles('WORKSPACE.bazel', '.bazelversion') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-arm64-
+      
+      - name: Build all targets (ARM64)
+        run: |
+          bazel build //... \
+            --config=ci \
+            --verbose_failures \
+            --cpu=aarch64 \
+            --extra_toolchains=@local_config_cc//:cc_toolchain
+      
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-arm64
+          path: |
+            bazel-bin/
+            bazel-out/*/logs/
+          retention-days: 7
+
+  # ===========================================================================
+  # LINT STAGE: Code quality checks (Rust, TypeScript, formatting)
+  # ===========================================================================
+
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.75.0
+          components: rustfmt, clippy
+      
+      - name: Cache Rust artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+        continue-on-error: false
+      
+      - name: Run Clippy lints
+        run: cargo clippy --all-targets --all-features -- -D warnings
+        continue-on-error: false
+      
+      - name: Verify doc comments
+        run: |
+          # Check that public items have doc comments
+          cargo clippy --all-targets -- -W missing-docs 2>&1 | head -50
+        continue-on-error: true
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install TypeScript lint tools
+        run: |
+          npm install -g eslint prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin
+      
+      - name: Check TypeScript files (if present)
+        run: |
+          if find . -name "*.ts" -o -name "*.tsx" | grep -q .; then
+            eslint --ext .ts,.tsx . || true
+            prettier --check . || true
+          fi
+        continue-on-error: true
+      
+      - name: Check YAML/TOML formatting
+        run: |
+          # Validate YAML
+          find . -name "*.yml" -o -name "*.yaml" | xargs -I {} sh -c 'python3 -c "import yaml; yaml.safe_load(open(\"{}\"))" || echo "Invalid: {}"'
+          # Validate TOML
+          find . -name "*.toml" | while read f; do
+            python3 -c "import tomllib; tomllib.load(open(\"$f\", \"rb\"))" || echo "Invalid: $f"
+          done || true
+        continue-on-error: true
+
+  # ===========================================================================
+  # UNIT TEST STAGE: Bazel test //... (all unit tests)
+  # ===========================================================================
+
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build-linux-x86_64]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache Bazel build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelrc
+          key: ${{ runner.os }}-bazel-${{ hashFiles('WORKSPACE.bazel', '.bazelversion') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+      
+      - name: Run all unit tests
+        run: |
+          bazel test //... \
+            --config=ci \
+            --config=coverage \
+            --verbose_failures \
+            --test_output=errors \
+            --test_summary=short \
+            --cache_test_results=no
+      
+      - name: Collect test results
+        if: always()
+        run: |
+          mkdir -p test-results
+          find bazel-testlogs -name "test.xml" -exec cp {} test-results/ \;
+          ls -la test-results/ || echo "No test results found"
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: test-results/
+          retention-days: 30
+      
+      - name: Publish test report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Unit Test Results
+          path: 'test-results/**/*.xml'
+          reporter: 'java-junit'
+          fail-on-error: false
+
+  # ===========================================================================
+  # INTEGRATION TEST STAGE: QEMU-based kernel tests (prototype)
+  # ===========================================================================
+
+  test-integration:
+    name: Integration Tests (QEMU)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build-linux-x86_64]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install QEMU and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils
+          qemu-system-x86_64 --version
+      
+      - name: Cache Bazel build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelrc
+          key: ${{ runner.os }}-bazel-${{ hashFiles('WORKSPACE.bazel', '.bazelversion') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+      
+      - name: Build kernel image for testing
+        run: |
+          bazel build //kernel:kernel_image \
+            --config=ci
+      
+      - name: Run QEMU integration tests
+        run: |
+          chmod +x ci/qemu_test_runner.sh
+          ./ci/qemu_test_runner.sh \
+            --kernel bazel-bin/kernel/kernel_image \
+            --timeout 300 \
+            --verbose
+        continue-on-error: true
+      
+      - name: Upload integration test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-logs
+          path: |
+            qemu-test-*.log
+            integration-test-results.txt
+          retention-days: 7
+
+  # ===========================================================================
+  # BENCHMARK STAGE: Performance metrics collection
+  # ===========================================================================
+
+  benchmark:
+    name: Benchmark & Performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build-linux-x86_64]
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache Bazel build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelrc
+          key: ${{ runner.os }}-bazel-${{ hashFiles('WORKSPACE.bazel', '.bazelversion') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+      
+      - name: Build benchmarks
+        run: |
+          bazel build //benches:all \
+            --config=ci
+      
+      - name: Run benchmarks
+        run: |
+          bazel run //benches:criterion_benches \
+            --config=ci \
+            -- --verbose --output-format verbose
+      
+      - name: Collect benchmark results
+        run: |
+          mkdir -p benchmark-results
+          find bazel-bin/benches -name "*.json" -exec cp {} benchmark-results/ \;
+          ls -la benchmark-results/
+      
+      - name: Check for performance regressions
+        run: |
+          python3 ci/benchmark_checker.py \
+            --baseline main \
+            --current HEAD \
+            --config ci/benchmark_config.toml \
+            --threshold 10
+        continue-on-error: true
+      
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark-results/
+          retention-days: 30
+      
+      - name: Comment benchmark results on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const benchmarkData = JSON.parse(fs.readFileSync('benchmark-results/benchmark_summary.json', 'utf8'));
+            const comment = `## Benchmark Results
+            
+            \`\`\`json
+            ${JSON.stringify(benchmarkData, null, 2)}
+            \`\`\`
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+        continue-on-error: true
+
+  # ===========================================================================
+  # ARTIFACT UPLOAD STAGE: For releases
+  # ===========================================================================
+
+  upload-artifacts:
+    name: Upload Artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build-linux-x86_64, build-linux-arm64]
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache Bazel build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelrc
+          key: ${{ runner.os }}-bazel-${{ hashFiles('WORKSPACE.bazel', '.bazelversion') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+      
+      - name: Build release artifacts
+        run: |
+          bazel build //sdk:cs_pkg //sdk/tools:all //docs:all \
+            --config=ci \
+            --config=release
+      
+      - name: Package release artifacts
+        run: |
+          mkdir -p release-artifacts
+          cp bazel-bin/sdk/cs_pkg release-artifacts/cs-pkg-x86_64
+          cp bazel-bin/sdk/tools/* release-artifacts/ || true
+          cp -r bazel-bin/docs release-artifacts/docs || true
+          ls -la release-artifacts/
+      
+      - name: Upload to GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-artifacts/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ===========================================================================
+  # FINAL STATUS CHECK
+  # ===========================================================================
+
+  ci-status:
+    name: CI Status Check
+    runs-on: ubuntu-latest
+    needs: [build-linux-x86_64, lint, test-unit, benchmark]
+    if: always()
+    steps:
+      - name: Check CI status
+        run: |
+          echo "Build Status: ${{ needs.build-linux-x86_64.result }}"
+          echo "Lint Status: ${{ needs.lint.result }}"
+          echo "Unit Test Status: ${{ needs.test-unit.result }}"
+          echo "Benchmark Status: ${{ needs.benchmark.result }}"
+          
+          if [ "${{ needs.build-linux-x86_64.result }}" = "failure" ] || \
+             [ "${{ needs.lint.result }}" = "failure" ] || \
+             [ "${{ needs.test-unit.result }}" = "failure" ]; then
+            echo "CI pipeline failed"
+            exit 1
+          fi
+          echo "CI pipeline passed"

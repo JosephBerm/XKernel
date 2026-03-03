@@ -1,0 +1,18 @@
+[package]
+name = "cs-semantic_memory"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "cs_semantic_memory"
+path = "src/lib.rs"
+
+[dependencies]
+ulid = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+bitflags = { workspace = true }
+
+[features]
+default = []

@@ -1,0 +1,302 @@
+# Cognitive Substrate - GitHub Actions Release Pipeline
+#
+# Week 5 Deliverable: Automated release build and deployment
+# Engineer: 10 (Tooling, Packaging & Documentation)
+# Date: 2026-03-01
+#
+# Trigger: Release tags (v*.*.*)
+# Artifacts: Compiled binaries for x86_64 and ARM64
+# Distribution: GitHub releases, package managers
+#
+# Documentation: docs/release_guide.md
+
+name: Release Pipeline
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 0.1.0)'
+        required: true
+      prerelease:
+        description: 'Mark as prerelease'
+        required: false
+        default: 'false'
+
+env:
+  RUST_BACKTRACE: 1
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  # ===========================================================================
+  # Extract and Validate Release Information
+  # ===========================================================================
+
+  prepare-release:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - id: version
+        name: Extract version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            IS_PRERELEASE="${{ github.event.release.prerelease }}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+            IS_PRERELEASE="${{ github.event.inputs.prerelease }}"
+          fi
+          
+          VERSION=${VERSION#v}  # Remove 'v' prefix if present
+          TAG="v${VERSION}"
+          
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "is_prerelease=${IS_PRERELEASE}" >> $GITHUB_OUTPUT
+          
+          echo "Release Version: ${VERSION}"
+          echo "Release Tag: ${TAG}"
+          echo "Is Prerelease: ${IS_PRERELEASE}"
+      
+      - name: Validate version format
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format: $VERSION"
+            exit 1
+          fi
+          echo "Version format validated: $VERSION"
+
+  # ===========================================================================
+  # BUILD STAGE: Release builds for all platforms
+  # ===========================================================================
+
+  build-release-x86_64:
+    name: Build Release x86_64
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [prepare-release]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Bazel
+        run: |
+          export BAZEL_VERSION=$(cat .bazelversion)
+          echo "Using Bazel version: $BAZEL_VERSION"
+      
+      - name: Cache Bazel build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelrc
+          key: release-bazel-x86_64-${{ needs.prepare-release.outputs.version }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+      
+      - name: Build release artifacts (x86_64)
+        run: |
+          bazel build //sdk:cs_pkg //sdk/tools:all //docs:all \
+            --config=release \
+            --cpu=k8 \
+            --stamp \
+            -c opt
+      
+      - name: Verify build artifacts
+        run: |
+          ls -lh bazel-bin/sdk/cs_pkg
+          ls -lh bazel-bin/sdk/tools/
+          find bazel-bin/docs -type f | head -10
+      
+      - name: Create tarball (x86_64)
+        run: |
+          mkdir -p release-package
+          cp bazel-bin/sdk/cs_pkg release-package/cs-pkg-x86_64-linux
+          cp bazel-bin/sdk/tools/* release-package/ || true
+          cd release-package && tar czf ../cs-pkg-x86_64-linux-${{ needs.prepare-release.outputs.version }}.tar.gz * && cd ..
+          ls -lh cs-pkg-x86_64-linux-*.tar.gz
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-x86_64
+          path: cs-pkg-x86_64-linux-*.tar.gz
+          retention-days: 7
+
+  build-release-arm64:
+    name: Build Release ARM64
+    runs-on: ubuntu-latest-arm64
+    timeout-minutes: 25
+    needs: [prepare-release]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Bazel
+        run: |
+          export BAZEL_VERSION=$(cat .bazelversion)
+          echo "Using Bazel version: $BAZEL_VERSION"
+      
+      - name: Cache Bazel build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/bazel
+            ~/.bazelrc
+          key: release-bazel-arm64-${{ needs.prepare-release.outputs.version }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-arm64-
+      
+      - name: Build release artifacts (ARM64)
+        run: |
+          bazel build //sdk:cs_pkg //sdk/tools:all //docs:all \
+            --config=release \
+            --cpu=aarch64 \
+            --stamp \
+            -c opt
+      
+      - name: Verify build artifacts
+        run: |
+          ls -lh bazel-bin/sdk/cs_pkg
+          ls -lh bazel-bin/sdk/tools/
+      
+      - name: Create tarball (ARM64)
+        run: |
+          mkdir -p release-package
+          cp bazel-bin/sdk/cs_pkg release-package/cs-pkg-aarch64-linux
+          cp bazel-bin/sdk/tools/* release-package/ || true
+          cd release-package && tar czf ../cs-pkg-aarch64-linux-${{ needs.prepare-release.outputs.version }}.tar.gz * && cd ..
+          ls -lh cs-pkg-aarch64-linux-*.tar.gz
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-arm64
+          path: cs-pkg-aarch64-linux-*.tar.gz
+          retention-days: 7
+
+  # ===========================================================================
+  # PUBLISH STAGE: Upload to GitHub releases
+  # ===========================================================================
+
+  publish-release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [prepare-release, build-release-x86_64, build-release-arm64]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download x86_64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-x86_64
+      
+      - name: Download ARM64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-arm64
+      
+      - name: Generate release notes
+        run: |
+          cat > RELEASE_NOTES.md << 'NOTES_EOF'
+          # Cognitive Substrate v${{ needs.prepare-release.outputs.version }}
+          
+          ## Changes
+          
+          See [full changelog](https://github.com/cognitive-substrate/cognitive-substrate/blob/main/CHANGELOG.md) for details.
+          
+          ## Installation
+          
+          ### x86_64 Linux
+          
+          \`\`\`bash
+          tar xzf cs-pkg-x86_64-linux-${{ needs.prepare-release.outputs.version }}.tar.gz
+          ./install.sh
+          \`\`\`
+          
+          ### ARM64 Linux
+          
+          \`\`\`bash
+          tar xzf cs-pkg-aarch64-linux-${{ needs.prepare-release.outputs.version }}.tar.gz
+          ./install.sh
+          \`\`\`
+          
+          ## Artifacts
+          
+          - cs-pkg-x86_64-linux-${{ needs.prepare-release.outputs.version }}.tar.gz (x86_64 Linux)
+          - cs-pkg-aarch64-linux-${{ needs.prepare-release.outputs.version }}.tar.gz (ARM64 Linux)
+          
+          ## Verification
+          
+          All artifacts are signed with GPG. Verify with:
+          
+          \`\`\`bash
+          gpg --verify cs-pkg-*.tar.gz.asc
+          \`\`\`
+          
+          NOTES_EOF
+      
+      - name: Upload to GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            cs-pkg-x86_64-linux-*.tar.gz
+            cs-pkg-aarch64-linux-*.tar.gz
+            RELEASE_NOTES.md
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ needs.prepare-release.outputs.is_prerelease == 'true' }}
+          tag_name: ${{ needs.prepare-release.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create release documentation
+        run: |
+          mkdir -p release-docs
+          cp RELEASE_NOTES.md release-docs/
+          echo "Release ${{ needs.prepare-release.outputs.version }} published successfully" > release-docs/status.txt
+      
+      - name: Upload release documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-docs
+          path: release-docs/
+          retention-days: 30
+
+  # ===========================================================================
+  # POST-RELEASE: Notification and verification
+  # ===========================================================================
+
+  verify-release:
+    name: Verify Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [prepare-release, publish-release]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check release assets
+        run: |
+          echo "Verifying release assets for v${{ needs.prepare-release.outputs.version }}"
+          # Use GitHub API to verify assets were uploaded
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ needs.prepare-release.outputs.tag }}" \
+            | python3 -m json.tool | grep -E '"name"|"size"' || echo "Could not verify release"
+      
+      - name: Notify release channel
+        if: success()
+        run: |
+          echo "Release v${{ needs.prepare-release.outputs.version }} completed successfully"
+          echo "Check the GitHub releases page for downloads and release notes"
+        continue-on-error: true

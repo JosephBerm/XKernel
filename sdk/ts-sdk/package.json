@@ -1,0 +1,65 @@
+{
+  "name": "@cognitive-substrate/sdk",
+  "version": "1.0.0",
+  "description": "TypeScript SDK for Cognitive Substrate CSCI v0.1 - async/await syscall bindings",
+  "license": "Apache-2.0",
+  "author": "Cognitive Substrate Project",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cognitive-substrate/xkernal.git",
+    "directory": "sdk/ts-sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/cognitive-substrate/xkernal/issues"
+  },
+  "homepage": "https://github.com/cognitive-substrate/xkernal/tree/main/sdk/ts-sdk",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./syscalls": {
+      "import": "./dist/syscalls/index.js",
+      "types": "./dist/syscalls/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "type-check": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "cognitive-substrate",
+    "csci",
+    "sdk",
+    "syscalls",
+    "async",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,15 @@
+[package]
+name = "cs-pkg"
+version = "1.0.0"
+edition = "2021"
+authors = ["XKernal Contributors"]
+license = "Apache-2.0"
+description = "Cognitive Substrate package manager CLI"
+repository = "https://github.com/xkernal/cognitive-substrate"
+
+[[bin]]
+name = "cs-pkg"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }

@@ -1,0 +1,25 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+# Rust, TypeScript, C# - 4 spaces
+[*.{rs,ts,tsx,cs}]
+indent_style = space
+indent_size = 4
+
+# YAML and JSON - 2 spaces
+[*.{yml,yaml,json}]
+indent_style = space
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false

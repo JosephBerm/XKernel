@@ -1,0 +1,15 @@
+[package]
+name = "cs-capgraph"
+version = "1.0.0"
+edition = "2021"
+authors = ["XKernal Contributors"]
+license = "Apache-2.0"
+description = "Cognitive Substrate capability graph visualization CLI"
+repository = "https://github.com/xkernal/cognitive-substrate"
+
+[[bin]]
+name = "cs-capgraph"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.4", features = ["derive"] }

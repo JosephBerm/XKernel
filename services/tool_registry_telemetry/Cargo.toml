@@ -1,0 +1,19 @@
+[package]
+name = "cs-tool_registry_telemetry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "cs_tool_registry_telemetry"
+path = "src/lib.rs"
+
+[dependencies]
+ulid = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+bitflags = { workspace = true }
+
+[features]
+default = []
+# no_std is default behavior of this crate
