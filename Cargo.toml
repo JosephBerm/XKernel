@@ -16,6 +16,7 @@ members = [
     "sdk/tools/cs-capgraph",
     "sdk/tools/cs-top",
     "sdk/tools/cs-ctl",
+    "daemon/cs-daemon",
 ]
 resolver = "2"
 
@@ -33,6 +34,22 @@ tracing = "0.1"
 thiserror = "2.0"
 ulid = "1.1"
 bitflags = "2.0"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# HTTP server (control plane API)
+axum = { version = "0.7", features = ["json"] }
+tower-http = { version = "0.5", features = ["trace", "cors"] }
+
+# Observability
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter"] }
+
+# HTTP client (for CLI tools)
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+# Timestamps
+chrono = { version = "0.4", features = ["serde"] }
 
 [profile.release]
 opt-level = 3

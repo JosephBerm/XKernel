@@ -4,7 +4,7 @@ version = "1.0.0"
 edition = "2021"
 authors = ["XKernal Contributors"]
 license = "Apache-2.0"
-description = "Cognitive Substrate unified control CLI"
+description = "Cognitive Substrate unified control CLI — client for cs-daemon"
 repository = "https://github.com/xkernal/cognitive-substrate"
 
 [[bin]]
@@ -13,3 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.4", features = ["derive"] }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }

@@ -1,0 +1,50 @@
+[package]
+name = "cs-daemon"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Cognitive Substrate daemon — control plane for AI agent orchestration"
+
+[[bin]]
+name = "cs-daemon"
+path = "src/main.rs"
+
+[dependencies]
+# Kernel layer (L0)
+ct-lifecycle = { path = "../../kernel/ct_lifecycle" }
+capability-engine = { path = "../../kernel/capability_engine" }
+ipc-signals-exceptions = { path = "../../kernel/ipc_signals_exceptions" }
+
+# Services layer (L1)
+cs-semantic_memory = { path = "../../services/semantic_memory" }
+cs-tool_registry_telemetry = { path = "../../services/tool_registry_telemetry" }
+
+# Runtime layer (L2)
+cs-framework_adapters = { path = "../../runtime/framework_adapters" }
+cs-semantic_fs_agent_lifecycle = { path = "../../runtime/semantic_fs_agent_lifecycle" }
+
+# SDK layer (L3)
+cs-csci = { path = "../../sdk/csci" }
+
+# Async runtime
+tokio = { workspace = true }
+
+# HTTP server
+axum = { workspace = true }
+tower-http = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Observability
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+
+# IDs and timestamps
+ulid = { workspace = true }
+chrono = { workspace = true }
